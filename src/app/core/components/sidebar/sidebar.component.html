@@ -1,0 +1,29 @@
+<nav class="sidebar" [class.minimized]="isMinimized">
+  <button class="toggle-btn" (click)="toggleSidebar()">{{ isMinimized ? '→' : '←' }}</button>
+  <ul>
+    <li>
+      <a (click)="navigate('dashboard')" [class.active]="activeRoute === 'dashboard'">
+        <span class="icon">📊</span>
+        <span *ngIf="!isMinimized">Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a (click)="navigate('allocations')" [class.active]="activeRoute === 'allocations'">
+        <span class="icon">📅</span>
+        <span *ngIf="!isMinimized">Alocação</span>
+      </a>
+    </li>
+    <li>
+      <a (click)="navigate('kanban')" [class.active]="activeRoute === 'kanban'">
+        <span class="icon">📝</span>
+        <span *ngIf="!isMinimized">Quadro Kanban</span>
+      </a>
+    </li>
+    <li>
+      <a (click)="navigate('activities')" [class.active]="activeRoute === 'activities'">
+        <span class="icon">✅</span>
+        <span *ngIf="!isMinimized">Atividades</span>
+      </a>
+    </li>
+  </ul>
+</nav>

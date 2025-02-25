@@ -1,0 +1,31 @@
+<h2 style="margin-bottom: 40px;">Dashboard Geral</h2>
+
+<label>Membro CROSS: </label>
+
+<select>
+  <option *ngFor="let membro of membros" [value]="membro">{{ membro }}</option>
+</select>
+
+<div class="dashboard">
+  <div class="card">
+    <h3>Horas Alocadas por Squad</h3>
+    <canvas id="hoursBySquadChart"></canvas>
+  </div>
+  <div class="card">
+    <h3>Horas Gastas por Squad</h3>
+    <canvas id="hoursSpentBySquadChart"></canvas>
+  </div>
+  <div class="card">
+    <h3>Status das Tarefas</h3>
+    <canvas id="taskStatusChart"></canvas>
+  </div>
+  <div class="card">
+    <h3>Resumo Numérico</h3>
+    <ul>
+      <li>Total de Horas Alocadas: <strong>120h</strong></li>
+      <li>Horas Gastas: <strong>85h</strong></li>
+      <li>Tarefas Concluídas: <strong>18</strong></li>
+      <li>Tarefas Pendentes: <strong>5</strong></li>
+    </ul>
+  </div>
+</div>

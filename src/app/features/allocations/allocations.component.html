@@ -1,0 +1,64 @@
+<h2>Gerenciamento Membros CROSS</h2>
+
+<button class="new-allocation-btn" (click)="openNewAllocationModal()">
+  + Alocação
+</button>
+
+<label>Membro CROSS: </label>
+
+<select>
+  <option *ngFor="let membro of membros" [value]="membro">{{ membro }}</option>
+</select>
+<div class="allocation-list">
+  <div class="allocation-card" *ngFor="let allocation of allocations">
+    <h3>{{ allocation.name }}</h3>
+    <p>Squad: {{ allocation.squad }}</p>
+    <p>Horas Alocadas: {{ allocation.hours }}h</p>
+    <p>sprint: {{ allocation.sprint }}</p>
+    <button (click)="editAllocation(allocation)">Editar</button>
+    <button (click)="deleteAllocation(allocation.id)">Excluir</button>
+  </div>
+</div>
+
+<!-- Modal para Novo allocation -->
+<div class="modal" *ngIf="isModalOpen">
+  <div class="modal-content">
+    <h3>{{ isEditing ? "Editar Alocação" : "Nova Alocação" }}</h3>
+    <form (submit)="saveAllocation()">
+      <input
+        type="text"
+        placeholder="Nome do CROSS"
+        [(ngModel)]="allocationForm.name"
+        name="name"
+        required
+      />
+      <input
+        type="text"
+        placeholder="Squad Solicitante"
+        [(ngModel)]="allocationForm.squad"
+        name="squad"
+        required
+      />
+      <input
+        type="text"
+        placeholder="Sprint"
+        [(ngModel)]="allocationForm.sprint"
+        name="sprint"
+        required
+      />
+
+      <input
+        type="number"
+        placeholder="Horas Alocadas"
+        [(ngModel)]="allocationForm.hours"
+        name="hours"
+        required
+      />
+
+      <textarea id="textArea" name="textArea" cols="40" rows="5"></textarea>
+
+      <button type="submit">Salvar</button>
+      <button type="button" (click)="closeModal()">Cancelar</button>
+    </form>
+  </div>
+</div>

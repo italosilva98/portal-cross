@@ -1,0 +1,61 @@
+<label>Membro CROSS: </label>
+  <select
+    [(ngModel)]="selectedMember"
+    (ngModelChange)="onFilterChange($event, 'member')"
+  >
+    <option value="Todos">Todos</option>
+    <option *ngFor="let membro of membros" [value]="membro">
+      {{ membro }}
+    </option>
+  </select>
+  <label>Release: </label>
+  <select
+    [(ngModel)]="selectedRelease"
+    (ngModelChange)="onFilterChange($event, 'release')"
+  >
+    <option value="Todos">Todos</option>
+    <option *ngFor="let release of releases" [value]="release">
+      {{ release }}
+    </option>
+  </select>
+  <label>Sprint: </label>
+  <select
+    [(ngModel)]="selectedSprint"
+    (ngModelChange)="onFilterChange($event, 'sprint')"
+  >
+    <option value="Todos">Todos</option>
+    <option *ngFor="let sprint of sprints" [value]="sprint">
+      {{ sprint }}
+    </option>
+  </select>
+  <label>Squad: </label>
+  <select
+    [(ngModel)]="selectedSquad"
+    (ngModelChange)="onFilterChange($event, 'squad')"
+  >
+    <option value="Todos">Todos</option>
+    <option *ngFor="let squad of squads" [value]="squad">
+      {{ squad }}
+    </option>
+  </select>
+
+<div class="kanban-board">
+  <div class="kanban-column"
+       *ngFor="let column of columns"
+       [id]="column.name"
+       cdkDropList
+       [cdkDropListData]="column.tasks"
+       [cdkDropListConnectedTo]="connectedLists"
+       (cdkDropListDropped)="drop($event)">
+    <h3>{{ column.name }}</h3>
+    <div class="task-list">
+      <div class="task-card" *ngFor="let task of column.tasks" cdkDrag>
+        <h4>{{ task.title }}</h4>
+        <p>{{ task.description }}</p>
+
+        <!-- Placeholder Customizado -->
+        <div *cdkDragPlaceholder class="custom-placeholder"></div>
+      </div>
+    </div>
+  </div>
+</div>
