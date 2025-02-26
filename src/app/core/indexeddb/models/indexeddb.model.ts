@@ -30,6 +30,7 @@ export interface ITaskBoard {
   createdDate: Date;
   updatedDate: Date;
   squad: string;
+  prioridade: string
 }
 
 export interface AppDB extends DBSchema {

@@ -1,61 +1,243 @@
-<label>Membro CROSS: </label>
-  <select
-    [(ngModel)]="selectedMember"
-    (ngModelChange)="onFilterChange($event, 'member')"
-  >
-    <option value="Todos">Todos</option>
-    <option *ngFor="let membro of membros" [value]="membro">
-      {{ membro }}
-    </option>
-  </select>
-  <label>Release: </label>
-  <select
-    [(ngModel)]="selectedRelease"
-    (ngModelChange)="onFilterChange($event, 'release')"
-  >
-    <option value="Todos">Todos</option>
-    <option *ngFor="let release of releases" [value]="release">
-      {{ release }}
-    </option>
-  </select>
-  <label>Sprint: </label>
-  <select
-    [(ngModel)]="selectedSprint"
-    (ngModelChange)="onFilterChange($event, 'sprint')"
-  >
-    <option value="Todos">Todos</option>
-    <option *ngFor="let sprint of sprints" [value]="sprint">
-      {{ sprint }}
-    </option>
-  </select>
-  <label>Squad: </label>
-  <select
-    [(ngModel)]="selectedSquad"
-    (ngModelChange)="onFilterChange($event, 'squad')"
-  >
-    <option value="Todos">Todos</option>
-    <option *ngFor="let squad of squads" [value]="squad">
-      {{ squad }}
-    </option>
-  </select>
+<div class="filter-container">
+  <div class="filter-group">
+    <div class="add-activity-button">
+      <button (click)="openModal()">Adicionar Atividades</button>
+    </div>
+  </div>
+  <div class="filter-group" style="margin-left: 50px">
+    <label>Membro CROSS:</label>
+    <select
+      [(ngModel)]="selectedMember"
+      (ngModelChange)="onFilterChange($event, 'member')"
+    >
+      <option value="Todos">Todos</option>
+      <option *ngFor="let membro of membros" [value]="membro">
+        {{ membro }}
+      </option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Release:</label>
+    <select
+      [(ngModel)]="selectedRelease"
+      (ngModelChange)="onFilterChange($event, 'release')"
+    >
+      <option value="Todos">Todos</option>
+      <option *ngFor="let release of releases" [value]="release">
+        {{ release }}
+      </option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Sprint:</label>
+    <select
+      [(ngModel)]="selectedSprint"
+      (ngModelChange)="onFilterChange($event, 'sprint')"
+    >
+      <option value="Todos">Todos</option>
+      <option *ngFor="let sprint of sprints" [value]="sprint">
+        {{ sprint }}
+      </option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Squad:</label>
+    <select
+      [(ngModel)]="selectedSquad"
+      (ngModelChange)="onFilterChange($event, 'squad')"
+    >
+      <option value="Todos">Todos</option>
+      <option *ngFor="let squad of squads" [value]="squad">{{ squad }}</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label>Prioridade:</label>
+    <select
+      [(ngModel)]="selectedPriority"
+      (ngModelChange)="onFilterChange($event, 'priority')"
+    >
+      <option value="Todos">Todos</option>
+      <option *ngFor="let prioridade of prioridades" [value]="prioridade">
+        {{ prioridade }}
+      </option>
+    </select>
+  </div>
+</div>
 
 <div class="kanban-board">
-  <div class="kanban-column"
-       *ngFor="let column of columns"
-       [id]="column.name"
-       cdkDropList
-       [cdkDropListData]="column.tasks"
-       [cdkDropListConnectedTo]="connectedLists"
-       (cdkDropListDropped)="drop($event)">
+  <div
+    class="kanban-column"
+    *ngFor="let column of board"
+    [id]="column.name"
+    cdkDropList
+    [cdkDropListData]="column.tasks"
+    [cdkDropListConnectedTo]="connectedLists"
+    (cdkDropListDropped)="drop($event)"
+  >
     <h3>{{ column.name }}</h3>
     <div class="task-list">
-      <div class="task-card" *ngFor="let task of column.tasks" cdkDrag>
+      <div
+        class="task-card"
+        *ngFor="let task of column.tasks"
+        cdkDrag
+        [cdkDragData]="task"
+        (click)="updateActivity(task)"
+      >
         <h4>{{ task.title }}</h4>
         <p>{{ task.description }}</p>
+        <span [ngClass]="getPriorityClass(task.prioridade)"
+          >Prioridade: {{ task.prioridade }}</span
+        >
 
         <!-- Placeholder Customizado -->
         <div *cdkDragPlaceholder class="custom-placeholder"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="modal" [ngClass]="{ show: isModalOpen }">
+  <div class="modal-content">
+    <span class="close-button" (click)="closeModal()">&times;</span>
+    <h3>{{ isEditing ? "Editar Atividade" : "Nova Atividade" }}</h3>
+    <hr />
+    <form class="grid-form" [formGroup]="activityForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="title">Título</label>
+        <input
+          type="text"
+          id="title"
+          formControlName="title"
+          placeholder="Título"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="description">Descrição</label>
+        <input
+          type="text"
+          id="description"
+          formControlName="description"
+          placeholder="Descrição"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" formControlName="status">
+          <option value="">Selecione o Status</option>
+          <option value="To Do">To Do</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Review">Review</option>
+          <option value="Done">Done</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="release">Release</label>
+        <select id="release" formControlName="release">
+          <option value="">Selecione a Release</option>
+          <option *ngFor="let release of releases" [value]="release">
+            {{ release }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="sprint">Sprint</label>
+        <select id="sprint" formControlName="sprint">
+          <option value="">Selecione a Sprint</option>
+          <option *ngFor="let sprint of sprints" [value]="sprint">
+            {{ sprint }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="allocatedHours">Horas Alocadas</label>
+        <input
+          type="number"
+          id="allocatedHours"
+          formControlName="allocatedHours"
+          placeholder="Horas Alocadas"
+          min="1"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="spentHours">Horas Gastas</label>
+        <input
+          type="number"
+          id="spentHours"
+          formControlName="spentHours"
+          placeholder="Horas Gastas"
+          min="0"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="crossName">Nome do Membro Cross</label>
+        <select
+          id="crossName"
+          [(ngModel)]="newActivity.crossName"
+          name="crossName"
+          required
+          formControlName="crossName"
+        >
+          <option value="">Selecione o Membro Cross</option>
+          <option *ngFor="let membro of membros" [value]="membro">
+            {{ membro }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="squad">Squad</label>
+        <select
+          id="squad"
+          [(ngModel)]="newActivity.squad"
+          name="squad"
+          required
+          formControlName="squad"
+        >
+          <option value="">Selecione a Squad</option>
+          <option *ngFor="let squad of squads" [value]="squad">
+            {{ squad }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="prioridade">Prioridade</label>
+        <select
+          id="prioridade"
+          [(ngModel)]="newActivity.prioridade"
+          name="prioridade"
+          required
+          formControlName="prioridade"
+        >
+          <option value="">Selecione a prioridade</option>
+          <option *ngFor="let prioridade of prioridades" [value]="prioridade">
+            {{ prioridade }}
+          </option>
+        </select>
+      </div>
+
+      <div
+        class="form-buttons"
+        *ngIf="activityForm.get('status')?.value !== 'Done'"
+      >
+        <button type="submit" class="save-button">
+          {{ isEditing ? "Atualizar" : "Salvar" }} Atividade
+        </button>
+        <button
+          type="button"
+          class="delete-button"
+          *ngIf="isEditing"
+          (click)="deleteActivity(editActivityId!)"
+        >
+          Excluir
+        </button>
+      </div>
+    </form>
   </div>
 </div>

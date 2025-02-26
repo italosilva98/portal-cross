@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import Chart from 'chart.js/auto';
+import { ITaskBoard } from 'src/app/core/indexeddb/models/indexeddb.model';
 import { IndexedDBService } from 'src/app/core/indexeddb/services/indexeddb.service';
+import { TaskService } from 'src/app/core/indexeddb/services/task/task.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Component({
@@ -9,40 +11,117 @@ import { v4 as uuidv4 } from 'uuid';
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent {
-  reportData = [
-    { squad: 'Squad A', allocatedHours: 40, spentHours: 30 },
-    { squad: 'Squad B', allocatedHours: 35, spentHours: 28 },
-    { squad: 'Squad C', allocatedHours: 50, spentHours: 45 },
-  ];
+  activities: ITaskBoard[] = [];
+  reportData: any[] = [];
+  // reportData = [
+  //   { squad: 'Squad A', allocatedHours: 40, spentHours: 30 },
+  //   { squad: 'Squad B', allocatedHours: 35, spentHours: 28 },
+  //   { squad: 'Squad C', allocatedHours: 50, spentHours: 45 },
+  // ];
   reports: any;
-  reportTasks = [
-    { label: 'Backlog', task: 5 },
-    { label: 'Em Progresso', task: 8 },
-    { label: 'Concluído', task: 18 },
-  ];
-  membros = ['Todos', 'Italo Silvestre', 'Luiz Arquiteto', 'Gabriel UX']
+  // reportTasks = [
+  //   { label: 'Backlog', task: 5 },
+  //   { label: 'Em Progresso', task: 8 },
+  //   { label: 'Concluído', task: 18 },
+  // ];
+  reportTasks: any[] = [];
+  totalReport: {
+    allocatedHours: number;
+    spentHours: number;
+    completedTasks: number;
+    pendingTasks: number;
+  } = {
+    allocatedHours: 0,
+    spentHours: 0,
+    completedTasks: 0,
+    pendingTasks: 0,
+  };
+  membros = ['Todos', 'Italo Silvestre', 'Luiz Arquiteto', 'Gabriel UX'];
 
-  constructor(private indexedDBService: IndexedDBService) {}
+  constructor(private taskService: TaskService) {}
 
   async ngOnInit() {
-    await this.addDemoReport();
-    this.createCharts();
+    this.getActivity();
   }
 
-  async addDemoReport() {
-    // const newReport = {
-    //   id: uuidv4(),
-    //   type: 'Alocação',
-    //   data: {
-    //     squad: 'Squad A',
-    //     allocatedHours: 40,
-    //     spentHours: 30,
-    //   },
-    //   generatedDate: new Date(),
-    // };
-    // await this.indexedDBService.addItem('reports', newReport);
-    // this.reports = (await this.indexedDBService.getAllItems('dashboard')) || [];
-    // console.log('reports: ', this.reports);
+  transformToReportData(activities: any[]): any[] {
+    const reportData = activities.reduce((acc, activity) => {
+      const squad = activity.squad;
+      const existingSquad = acc.find((item: any) => item === squad);
+
+      if (existingSquad) {
+        existingSquad.allocatedHours += activity.allocatedHours;
+        existingSquad.spentHours += activity.spentHours;
+      } else {
+        acc.push({
+          squad: squad,
+          allocatedHours: activity.allocatedHours,
+          spentHours: activity.spentHours,
+        });
+      }
+
+      return acc;
+    }, []);
+
+    console.log('Transformed Report Data:', reportData);
+    return reportData;
+  }
+
+  transformToReportTask(activities: any[]): any[] {
+    const statusReport = activities.reduce((acc, activity) => {
+      const status = activity.status;
+      const existingStatus = acc.find((item: any) => item.label === status);
+
+      if (existingStatus) {
+        existingStatus.task += 1;
+      } else {
+        acc.push({
+          label: status,
+          task: 1,
+        });
+      }
+
+      return acc;
+    }, []);
+
+    console.log('Transformed Status Report Data:', statusReport);
+    return statusReport;
+  }
+
+  transformToTotalReport(activities: any[]): any {
+    const totalReport = activities.reduce(
+      (acc, activity) => {
+        acc.allocatedHours += activity.allocatedHours;
+        acc.spentHours += activity.spentHours;
+
+        if (activity.status === 'Done') {
+          acc.completedTasks += 1;
+        } else {
+          acc.pendingTasks += 1;
+        }
+
+        return acc;
+      },
+      {
+        allocatedHours: 0,
+        spentHours: 0,
+        completedTasks: 0,
+        pendingTasks: 0,
+      }
+    );
+
+    console.log('Total Report:', totalReport);
+    return totalReport;
+  }
+
+  getActivity() {
+    this.taskService.getAllTasks().then((response) => {
+      this.reportData = this.transformToReportData(response);
+      this.reportTasks = this.transformToReportTask(response);
+      this.totalReport = this.transformToTotalReport(response);
+      console.log('rep: ', this.reportData);
+      this.createCharts();
+    });
   }
 
   createCharts() {
