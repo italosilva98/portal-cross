@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import Chart from 'chart.js/auto';
-import { ITaskBoard } from 'src/app/core/indexeddb/models/indexeddb.model';
-import { IndexedDBService } from 'src/app/core/indexeddb/services/indexeddb.service';
-import { TaskService } from 'src/app/core/indexeddb/services/task/task.service';
-import { v4 as uuidv4 } from 'uuid';
+import { ITaskBoard } from '@indexeddb/models/indexeddb.model';
+import { TaskService } from '@indexeddb/services/task/task.service';
+import { SQUAD_MEMBERS } from '@constants/squad.constants';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,19 +10,15 @@ import { v4 as uuidv4 } from 'uuid';
   styleUrls: ['./dashboard.component.scss'],
 })
 export class DashboardComponent {
+  @Input() flow: string = '';
+
   activities: ITaskBoard[] = [];
   reportData: any[] = [];
-  // reportData = [
-  //   { squad: 'Squad A', allocatedHours: 40, spentHours: 30 },
-  //   { squad: 'Squad B', allocatedHours: 35, spentHours: 28 },
-  //   { squad: 'Squad C', allocatedHours: 50, spentHours: 45 },
-  // ];
+
   reports: any;
-  // reportTasks = [
-  //   { label: 'Backlog', task: 5 },
-  //   { label: 'Em Progresso', task: 8 },
-  //   { label: 'Concluído', task: 18 },
-  // ];
+
+  squadMembers = SQUAD_MEMBERS;
+
   reportTasks: any[] = [];
   totalReport: {
     allocatedHours: number;
@@ -36,6 +31,7 @@ export class DashboardComponent {
     completedTasks: 0,
     pendingTasks: 0,
   };
+
   membros = ['Todos', 'Italo Silvestre', 'Luiz Arquiteto', 'Gabriel UX'];
 
   constructor(private taskService: TaskService) {}

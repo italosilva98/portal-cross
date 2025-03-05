@@ -5,10 +5,17 @@ import {
   transferArrayItem,
 } from '@angular/cdk/drag-drop';
 import { v4 as uuidv4 } from 'uuid';
-import { ITaskBoard } from 'src/app/core/indexeddb/models/indexeddb.model';
-import { TaskService } from 'src/app/core/indexeddb/services/task/task.service';
-import { Column, Task } from '../models/kanban.models';
+import { ITaskBoard } from '@indexeddb/models/indexeddb.model';
+import { TaskService } from '@indexeddb/services/task/task.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Column, Task } from '../models/kanban.models';
+import {
+  CROSS_MEMBERS,
+  PRIORITIES,
+  RELEASES,
+  SPRINTS,
+  SQUAD_MEMBERS,
+} from '@constants/squad.constants';
 
 @Component({
   selector: 'app-kanban',
@@ -20,11 +27,11 @@ export class KanbanComponent implements OnInit {
   activities: ITaskBoard[] = [];
   activitiesBackup: ITaskBoard[] = [];
 
-  membros = ['Italo Silvestre', 'Luiz Arquiteto', 'Gabriel UX'];
-  sprints = ['S1', 'S2', 'S3', 'S4'];
-  releases = ['R1', 'R2', 'R3', 'R4'];
-  squads = ['Clix', 'Tron', 'Alvo', 'Entregas', 'Torre', 'Suprimentos'];
-  prioridades = ['Baixa', 'Média', 'Alta'];
+  membros = CROSS_MEMBERS;
+  sprints = SPRINTS;
+  releases = RELEASES;
+  squads = Object.keys(SQUAD_MEMBERS);
+  prioridades = PRIORITIES;
   selectedMember: string = 'Todos';
   selectedRelease: string = 'Todos';
   selectedSprint: string = 'Todos';

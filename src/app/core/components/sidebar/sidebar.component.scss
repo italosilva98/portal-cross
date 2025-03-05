@@ -6,21 +6,47 @@
   height: 100%;
   padding: 20px 0;
   transition: width 0.3s ease;
+  overflow: hidden; /* Impede que o conteúdo ultrapasse os limites */
 }
 
 .sidebar.minimized {
   width: 60px;
 }
 
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.back-btn,
 .toggle-btn {
   background: #34495e;
   color: #ecf0f1;
   border: none;
   cursor: pointer;
-  padding: 10px;
-  display: block;
-  text-align: center;
-  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background 0.3s ease, padding 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.back-btn {
+  background: #e74c3c;
+}
+
+.back-btn:hover {
+  background: #c0392b;
+}
+
+.toggle-btn:hover {
+  background: #3d566e;
 }
 
 .sidebar ul {
@@ -42,6 +68,7 @@
   border-radius: 8px;
   transition: background 0.3s ease;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .sidebar a:hover {

@@ -1,10 +1,10 @@
-<h2 style="margin-bottom: 40px;">Dashboard Geral</h2>
+<h2 class="mb-40">Dashboard Geral</h2>
 
-<label>Membro CROSS: </label>
-
-<select>
-  <option *ngFor="let membro of membros" [value]="membro">{{ membro }}</option>
-</select>
+<div class="filter-container">
+  <div class="filter-group">
+    <ng-content select="[filter]"> </ng-content>
+  </div>
+</div>
 
 <div class="dashboard">
   <div class="card">
@@ -22,10 +22,19 @@
   <div class="card">
     <h3>Resumo Numérico</h3>
     <ul>
-      <li>Total de Horas Alocadas: <strong>{{totalReport.allocatedHours}}h</strong></li>
-      <li>Horas Gastas: <strong>{{totalReport.spentHours}}h</strong></li>
-      <li>Tarefas Concluídas: <strong>{{totalReport.completedTasks}}</strong></li>
-      <li>Tarefas Pendentes: <strong>{{totalReport.pendingTasks}}</strong></li>
+      <li>
+        Total de Horas Alocadas:
+        <strong>{{ totalReport.allocatedHours }}h</strong>
+      </li>
+      <li>
+        Horas Gastas: <strong>{{ totalReport.spentHours }}h</strong>
+      </li>
+      <li>
+        Tarefas Concluídas: <strong>{{ totalReport.completedTasks }}</strong>
+      </li>
+      <li>
+        Tarefas Pendentes: <strong>{{ totalReport.pendingTasks }}</strong>
+      </li>
     </ul>
   </div>
 </div>

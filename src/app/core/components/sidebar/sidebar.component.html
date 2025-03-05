@@ -1,14 +1,27 @@
 <nav class="sidebar" [class.minimized]="isMinimized">
-  <button class="toggle-btn" (click)="toggleSidebar()">{{ isMinimized ? '→' : '←' }}</button>
+  <div class="sidebar-header">
+    <button class="back-btn" *ngIf="!isMinimized" (click)="navigate('home')">
+      Voltar
+    </button>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      {{ isMinimized ? "→" : "←" }}
+    </button>
+  </div>
   <ul>
     <li>
-      <a (click)="navigate('dashboard')" [class.active]="activeRoute === 'dashboard'">
+      <a
+        (click)="navigate('dashboard')"
+        [class.active]="activeRoute === 'dashboard'"
+      >
         <span class="icon">📊</span>
         <span *ngIf="!isMinimized">Dashboard</span>
       </a>
     </li>
-    <li>
-      <a (click)="navigate('allocations')" [class.active]="activeRoute === 'allocations'">
+    <li *ngIf="flowType !== 'squad'">
+      <a
+        (click)="navigate('allocations')"
+        [class.active]="activeRoute === 'allocations'"
+      >
         <span class="icon">📅</span>
         <span *ngIf="!isMinimized">Alocação</span>
       </a>
@@ -20,7 +33,10 @@
       </a>
     </li>
     <li>
-      <a (click)="navigate('activities')" [class.active]="activeRoute === 'activities'">
+      <a
+        (click)="navigate('activities')"
+        [class.active]="activeRoute === 'activities'"
+      >
         <span class="icon">✅</span>
         <span *ngIf="!isMinimized">Atividades</span>
       </a>

@@ -1,66 +1,14 @@
+<h2 class="mb-40">Quadro Kanban</h2>
+
 <div class="filter-container">
+  <div class="filter-group">
+    <ng-content select="[filter]"> </ng-content>
+  </div>
+
   <div class="filter-group">
     <div class="add-activity-button">
       <button (click)="openModal()">Adicionar Atividades</button>
     </div>
-  </div>
-  <div class="filter-group" style="margin-left: 50px">
-    <label>Membro CROSS:</label>
-    <select
-      [(ngModel)]="selectedMember"
-      (ngModelChange)="onFilterChange($event, 'member')"
-    >
-      <option value="Todos">Todos</option>
-      <option *ngFor="let membro of membros" [value]="membro">
-        {{ membro }}
-      </option>
-    </select>
-  </div>
-  <div class="filter-group">
-    <label>Release:</label>
-    <select
-      [(ngModel)]="selectedRelease"
-      (ngModelChange)="onFilterChange($event, 'release')"
-    >
-      <option value="Todos">Todos</option>
-      <option *ngFor="let release of releases" [value]="release">
-        {{ release }}
-      </option>
-    </select>
-  </div>
-  <div class="filter-group">
-    <label>Sprint:</label>
-    <select
-      [(ngModel)]="selectedSprint"
-      (ngModelChange)="onFilterChange($event, 'sprint')"
-    >
-      <option value="Todos">Todos</option>
-      <option *ngFor="let sprint of sprints" [value]="sprint">
-        {{ sprint }}
-      </option>
-    </select>
-  </div>
-  <div class="filter-group">
-    <label>Squad:</label>
-    <select
-      [(ngModel)]="selectedSquad"
-      (ngModelChange)="onFilterChange($event, 'squad')"
-    >
-      <option value="Todos">Todos</option>
-      <option *ngFor="let squad of squads" [value]="squad">{{ squad }}</option>
-    </select>
-  </div>
-  <div class="filter-group">
-    <label>Prioridade:</label>
-    <select
-      [(ngModel)]="selectedPriority"
-      (ngModelChange)="onFilterChange($event, 'priority')"
-    >
-      <option value="Todos">Todos</option>
-      <option *ngFor="let prioridade of prioridades" [value]="prioridade">
-        {{ prioridade }}
-      </option>
-    </select>
   </div>
 </div>
 

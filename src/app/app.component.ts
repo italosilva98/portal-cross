@@ -9,9 +9,23 @@ export class AppComponent {
   title = 'TechPlain';
   currentRoute: string = 'dashboard';
   isMinimized: boolean = false;
+  flowType: string = '';
+  isFlowActive = false;
+
   constructor() {}
 
   onRouteClicked(route: string) {
     this.currentRoute = route;
+
+    if (route === 'home') {
+      this.isFlowActive = false;
+      this.flowType = '';
+      this.currentRoute = 'dashboard';
+    }
+  }
+
+  handleFlow(flow: string) {
+    this.flowType = flow;
+    this.isFlowActive = true;
   }
 }

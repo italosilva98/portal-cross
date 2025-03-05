@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-sidebar',
@@ -6,6 +6,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
   styleUrls: ['./sidebar.component.scss'],
 })
 export class SidebarComponent {
+  @Input() flowType: string = '';
   @Output() routeClicked = new EventEmitter<string>();
   @Output() isMinimizedClicked = new EventEmitter<boolean>();
 
@@ -14,12 +15,11 @@ export class SidebarComponent {
 
   toggleSidebar() {
     this.isMinimized = !this.isMinimized;
-    this.isMinimizedClicked.emit(this.isMinimized)
+    this.isMinimizedClicked.emit(this.isMinimized);
   }
 
   navigate(route: string) {
     this.routeClicked.emit(route);
     this.activeRoute = route;
-
   }
 }

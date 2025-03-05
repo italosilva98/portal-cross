@@ -1,49 +1,15 @@
-<div class="activity-log">
-  <h2>Registro de Atividades</h2>
+  <h2 class="mb-40">Lista de Atividades</h2>
 
-  <label>Membro CROSS: </label>
-  <select
-    [(ngModel)]="selectedMember"
-    (ngModelChange)="onFilterChange($event, 'member')"
-  >
-    <option value="Todos">Todos</option>
-    <option *ngFor="let membro of membros" [value]="membro">
-      {{ membro }}
-    </option>
-  </select>
-  <label>Release: </label>
-  <select
-    [(ngModel)]="selectedRelease"
-    (ngModelChange)="onFilterChange($event, 'release')"
-  >
-    <option value="Todos">Todos</option>
-    <option *ngFor="let release of releases" [value]="release">
-      {{ release }}
-    </option>
-  </select>
-  <label>Sprint: </label>
-  <select
-    [(ngModel)]="selectedSprint"
-    (ngModelChange)="onFilterChange($event, 'sprint')"
-  >
-    <option value="Todos">Todos</option>
-    <option *ngFor="let sprint of sprints" [value]="sprint">
-      {{ sprint }}
-    </option>
-  </select>
-  <label>Squad: </label>
-  <select
-    [(ngModel)]="selectedSquad"
-    (ngModelChange)="onFilterChange($event, 'squad')"
-  >
-    <option value="Todos">Todos</option>
-    <option *ngFor="let squad of squads" [value]="squad">
-      {{ squad }}
-    </option>
-  </select>
+  <div class="filter-container">
+    <div class="filter-group">
+      <ng-content select="[filter]"> </ng-content>
+    </div>
 
-  <div class="add-activity-button">
-    <button (click)="openModal()">Adicionar Atividades</button>
+    <div class="filter-group">
+      <div class="add-activity-button">
+        <button (click)="openModal()">Adicionar Atividades</button>
+      </div>
+    </div>
   </div>
 
   <div class="modal" [ngClass]="{ show: isModalOpen }">
@@ -139,8 +105,8 @@
             formControlName="crossName"
           >
             <option value="">Selecione o Membro Cross</option>
-            <option *ngFor="let membro of membros" [value]="membro">
-              {{ membro }}
+            <option *ngFor="let member of members" [value]="member">
+              {{ member }}
             </option>
           </select>
         </div>
@@ -200,4 +166,4 @@
       </p>
     </li>
   </ul>
-</div>
+

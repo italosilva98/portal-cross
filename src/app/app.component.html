@@ -1,15 +1,31 @@
-<app-sidebar
-  (routeClicked)="onRouteClicked($event)"
-  (isMinimizedClicked)="isMinimized = $event"
->
-</app-sidebar>
-<div
-  class="main-content"
-  [class.minimized]="isMinimized"
-  [ngSwitch]="currentRoute"
->
-  <app-dashboard *ngSwitchCase="'dashboard'"></app-dashboard>
-  <app-allocations *ngSwitchCase="'allocations'"></app-allocations>
-  <app-kanban *ngSwitchCase="'kanban'"></app-kanban>
-  <app-activity-log *ngSwitchCase="'activities'"></app-activity-log>
-</div>
+<app-home
+  *ngIf="!isFlowActive"
+  (setFlowEmitter)="handleFlow($event)"
+></app-home>
+
+<ng-container *ngIf="isFlowActive">
+  <app-sidebar
+    [flowType]="flowType"
+    (routeClicked)="onRouteClicked($event)"
+    (isMinimizedClicked)="isMinimized = $event"
+  >
+  </app-sidebar>
+  <div
+    class="main-content"
+    [class.minimized]="isMinimized"
+    [ngSwitch]="currentRoute"
+  >
+    <app-dashboard *ngSwitchCase="'dashboard'">
+      <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
+    </app-dashboard>
+    <app-allocations *ngSwitchCase="'allocations'">
+      <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
+    </app-allocations>
+    <app-kanban *ngSwitchCase="'kanban'">
+      <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
+    </app-kanban>
+    <app-activity-log *ngSwitchCase="'activities'" [flow]="flowType">
+      <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
+    </app-activity-log>
+  </div>
+</ng-container>

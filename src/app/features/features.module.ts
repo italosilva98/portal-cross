@@ -4,12 +4,14 @@ import { SharedModule } from '../shared/shared.module';
 import { KanbanComponent } from './kanban/page/kanban.component';
 import { ActivityLogComponent } from './activity-log/page/activity-log.component';
 import { AllocationsComponent } from './allocations/allocations.component';
+import { HomeComponent } from './home/home.component';
 
 const COMPONENTS = [
   DashboardComponent,
   KanbanComponent,
   ActivityLogComponent,
   AllocationsComponent,
+  HomeComponent,
 ];
 
 @NgModule({

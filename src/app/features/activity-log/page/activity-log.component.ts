@@ -1,17 +1,37 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  AfterContentInit,
+  Component,
+  ContentChild,
+  Input,
+  OnInit,
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ITaskBoard } from 'src/app/core/indexeddb/models/indexeddb.model';
-import { TaskService } from 'src/app/core/indexeddb/services/task/task.service';
 import { v4 as uuidv4 } from 'uuid';
+
+import { ITaskBoard } from '@indexeddb/models/indexeddb.model';
+import { TaskService } from '@indexeddb/services/task/task.service';
+import { CustomFilterComponent } from '@components/custom-filter/custom-filter.component';
+import {
+  CROSS_MEMBERS,
+  RELEASES,
+  SPRINTS,
+  SQUAD_MEMBERS,
+  SquadKey,
+} from '@constants/squad.constants';
 
 @Component({
   selector: 'app-activity-log',
   templateUrl: './activity-log.component.html',
   styleUrls: ['./activity-log.component.scss'],
 })
-export class ActivityLogComponent implements OnInit {
+export class ActivityLogComponent implements OnInit, AfterContentInit {
+  @Input() flow: string = '';
+
+  @ContentChild(CustomFilterComponent) filter!: CustomFilterComponent;
+
   activities: ITaskBoard[] = [];
   activitiesBackup: ITaskBoard[] = [];
+
   selectedMember: string = 'Todos';
   selectedRelease: string = 'Todos';
   selectedSprint: string = 'Todos';
@@ -51,12 +71,19 @@ export class ActivityLogComponent implements OnInit {
     squad: new FormControl('', Validators.required),
   });
 
-  membros = ['Italo Silvestre', 'Luiz Arquiteto', 'Gabriel UX'];
-  sprints = ['S1', 'S2', 'S3', 'S4'];
-  releases = ['R1', 'R2', 'R3', 'R4'];
-  squads = ['Clix', 'Tron', 'Alvo', 'Entregas', 'Torre', 'Suprimentos'];
+  members = CROSS_MEMBERS;
+  sprints = SPRINTS;
+  releases = RELEASES;
+  squads = Object.keys(SQUAD_MEMBERS);
 
   constructor(private taskService: TaskService) {}
+  ngAfterContentInit(): void {
+    if (this.filter) {
+      this.filter.filterChangeEmmiter.subscribe((event) => {
+        this.onFilterChange(event.value, event.event);
+      });
+    }
+  }
 
   ngOnInit(): void {
     this.getActivity();
@@ -151,6 +178,7 @@ export class ActivityLogComponent implements OnInit {
         this.activitiesBackup = response;
       });
   }
+
   getActivityByRelease() {
     this.taskService
       .getTasksByRelease(this.selectedRelease)
@@ -158,6 +186,7 @@ export class ActivityLogComponent implements OnInit {
         this.activities = response;
       });
   }
+
   getActivityBySprint() {
     this.taskService.getTasksBySprint(this.selectedSprint).then((response) => {
       this.activities = response;
@@ -173,6 +202,7 @@ export class ActivityLogComponent implements OnInit {
     } else if (type === 'sprint') {
       this.selectedSprint = newValue;
     } else if (type === 'squad') {
+      this.members = SQUAD_MEMBERS[newValue as SquadKey];
       this.selectedSquad = newValue;
     }
 

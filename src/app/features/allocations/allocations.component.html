@@ -1,14 +1,16 @@
-<h2>Gerenciamento Membros CROSS</h2>
+<h2 class="mb-40">Gerenciamento Membros CROSS</h2>
 
-<button class="new-allocation-btn" (click)="openNewAllocationModal()">
-  + Alocação
-</button>
+<div class="filter-container">
+  <div class="filter-group">
+    <ng-content select="[filter]"> </ng-content>
+  </div>
 
-<label>Membro CROSS: </label>
-
-<select>
-  <option *ngFor="let membro of membros" [value]="membro">{{ membro }}</option>
-</select>
+  <div class="filter-group">
+    <div class="add-activity-button">
+      <button (click)="openNewAllocationModal()">Adicionar Alocação</button>
+    </div>
+  </div>
+</div>
 <div class="allocation-list">
   <div class="allocation-card" *ngFor="let allocation of allocations">
     <h3>{{ allocation.name }}</h3>
