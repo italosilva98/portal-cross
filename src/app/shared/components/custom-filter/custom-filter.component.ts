@@ -20,6 +20,8 @@ export class CustomFilterComponent implements OnInit {
     value: string;
   }>();
 
+  @Output() cleanFilterEmitter = new EventEmitter<boolean>();
+
   members: string[] = [];
   sprints = SPRINTS;
   releases = RELEASES;
@@ -47,5 +49,15 @@ export class CustomFilterComponent implements OnInit {
     if (type === 'squad' && this.flowType == 'squad') {
       this.members = SQUAD_MEMBERS[newValue as SquadKey];
     }
+  }
+
+  cleanFilters() {
+    this.selectedMember = 'Todos';
+    this.selectedRelease = 'Todos';
+    this.selectedSprint = 'Todos';
+    this.selectedSquad = 'Todos';
+    this.selectedPriority = 'Todos';
+
+    this.cleanFilterEmitter.emit(true);
   }
 }

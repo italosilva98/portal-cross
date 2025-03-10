@@ -12,6 +12,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   flex-grow: 1;
   flex-shrink: 0;
+  min-width: 300px;
 }
 
 .kanban-column h3 {
@@ -90,11 +91,7 @@
 
 
 .custom-placeholder {
-  // background: transparent;
-  // border: 2px dashed #bbb;
-  // border-radius: 8px;
   height: 100px;
-  // margin-bottom: 10px;
 }
 
 
@@ -191,5 +188,18 @@
 
 .delete-button:hover {
   background: #d32f2f;
+}
+
+@media (max-width: 768px) {
+  .kanban-board {
+    flex-direction: column; /* Empilha as colunas verticalmente */
+    gap: 10px;
+    padding: 10px;
+
+  }
+
+  .kanban-column {
+    min-width: auto; /* Permite que os cards se ajustem à largura disponível */
+  }
 }
 

@@ -18,6 +18,7 @@ import {
   SQUAD_MEMBERS,
   SquadKey,
 } from '@constants/squad.constants';
+import { SquadRequestsService } from '@indexeddb/services/squad-requests/squad-requests.service';
 
 @Component({
   selector: 'app-activity-log',
@@ -25,7 +26,7 @@ import {
   styleUrls: ['./activity-log.component.scss'],
 })
 export class ActivityLogComponent implements OnInit, AfterContentInit {
-  @Input() flow: string = '';
+  @Input() flowType: string = '';
 
   @ContentChild(CustomFilterComponent) filter!: CustomFilterComponent;
 
@@ -36,6 +37,7 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
   selectedRelease: string = 'Todos';
   selectedSprint: string = 'Todos';
   selectedSquad: string = 'Todos';
+  totalAllocatedHours = 0;
 
   newActivity = {
     id: '',
@@ -71,22 +73,42 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     squad: new FormControl('', Validators.required),
   });
 
-  members = CROSS_MEMBERS;
+  members: string[] = [];
   sprints = SPRINTS;
   releases = RELEASES;
   squads = Object.keys(SQUAD_MEMBERS);
 
-  constructor(private taskService: TaskService) {}
+  constructor(
+    private taskService: TaskService,
+    private squadRequestsService: SquadRequestsService
+  ) {}
+
   ngAfterContentInit(): void {
     if (this.filter) {
       this.filter.filterChangeEmmiter.subscribe((event) => {
         this.onFilterChange(event.value, event.event);
       });
+      this.filter.cleanFilterEmitter.subscribe((isCleanFilter) => {
+        if (isCleanFilter) {
+          this.onCleanFilter();
+        }
+      });
     }
   }
 
   ngOnInit(): void {
+    if (this.flowType === 'cross') {
+      this.members = CROSS_MEMBERS;
+    }
     this.getActivity();
+  }
+
+  onCleanFilter() {
+    this.selectedMember = 'Todos';
+    this.selectedSprint = 'Todos';
+    this.selectedRelease = 'Todos';
+    this.selectedSquad = 'Todos';
+    this.activities = [...this.activitiesBackup];
   }
 
   openModal() {
@@ -169,6 +191,15 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     });
   }
 
+  getTotalAllocation(crossName: string) {
+    console.log(crossName);
+    this.squadRequestsService
+      .getRequestsByCrossName(crossName)
+      .then((response) => {
+        this.totalAllocatedHours = response[0].allocatedHours;
+      });
+  }
+
   getActivityByCrossName() {
     this.taskService
       .getTasksByCrossName(this.selectedMember)
@@ -191,6 +222,14 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     this.taskService.getTasksBySprint(this.selectedSprint).then((response) => {
       this.activities = response;
     });
+  }
+
+  onSquadChange(squad: string) {
+    if (this.flowType === 'squad')
+      this.members = SQUAD_MEMBERS[squad as SquadKey];
+  }
+  onCrossNameChange(crossName: string) {
+    this.getTotalAllocation(crossName);
   }
 
   onFilterChange(newValue: string, type: string): void {
@@ -238,96 +277,5 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
       // Verifica se todas as condições são verdadeiras
       return conditions.every(Boolean);
     });
-  }
-
-  onFilterChange2(newValue: string, type: string): void {
-    if (type === 'member') {
-      this.selectedMember = newValue;
-
-      if (
-        newValue === 'Todos' &&
-        this.selectedSprint === 'Todos' &&
-        this.selectedRelease === 'Todos'
-      ) {
-        this.getActivity();
-      } else if (
-        this.selectedSprint === 'Todos' &&
-        this.selectedRelease === 'Todos'
-      ) {
-        this.activities = this.activitiesBackup.filter(
-          (task) => task.crossName === newValue
-        );
-      } else if (this.selectedSprint === 'Todos') {
-        this.activities = this.activitiesBackup.filter(
-          (task) =>
-            task.crossName === newValue && task.release === this.selectedRelease
-        );
-      } else {
-        this.activities = this.activitiesBackup.filter(
-          (task) =>
-            task.sprint === newValue &&
-            task.release === this.selectedRelease &&
-            task.crossName === this.selectedMember
-        );
-      }
-    } else if (type === 'release') {
-      this.selectedRelease = newValue;
-
-      if (
-        newValue === 'Todos' &&
-        this.selectedMember === 'Todos' &&
-        this.selectedSprint === 'Todos'
-      ) {
-        this.getActivity();
-      } else if (
-        this.selectedMember === 'Todos' &&
-        this.selectedSprint === 'Todos'
-      ) {
-        this.activities = this.activitiesBackup.filter(
-          (task) => task.release === newValue
-        );
-      } else if (this.selectedMember === 'Todos') {
-        this.activities = this.activitiesBackup.filter(
-          (task) =>
-            task.release === newValue && task.sprint === this.selectedSprint
-        );
-      } else {
-        this.activities = this.activitiesBackup.filter(
-          (task) =>
-            task.release === newValue &&
-            task.sprint === this.selectedSprint &&
-            task.crossName === this.selectedMember
-        );
-      }
-    } else {
-      this.selectedSprint = newValue;
-
-      if (
-        newValue === 'Todos' &&
-        this.selectedMember === 'Todos' &&
-        this.selectedRelease === 'Todos'
-      ) {
-        this.getActivity();
-      } else if (
-        this.selectedMember === 'Todos' &&
-        this.selectedRelease === 'Todos'
-      ) {
-        this.activities = this.activitiesBackup.filter(
-          (task) => task.sprint === newValue
-        );
-      } else if (this.selectedMember === 'Todos') {
-        this.activities = this.activitiesBackup.filter(
-          (task) =>
-            task.sprint === newValue && task.release === this.selectedRelease
-        );
-      } else {
-        this.activities = this.activitiesBackup.filter(
-          (task) =>
-            task.sprint === newValue &&
-            task.release === this.selectedRelease &&
-            task.crossName === this.selectedMember
-        );
-      }
-    }
   }
 }

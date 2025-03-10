@@ -31,3 +31,19 @@
   border-color: #80bdff;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
+
+.clear-filters button {
+  cursor: pointer;
+  background: transparent;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 400;
+  color: rgb(127, 133, 141);
+  text-transform: uppercase;
+  border: none
+
+}
+
+.clear-filters button:hover {
+  text-decoration: underline;
+}

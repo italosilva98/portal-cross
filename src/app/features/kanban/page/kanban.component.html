@@ -122,23 +122,6 @@
           min="0"
         />
       </div>
-
-      <div class="form-group">
-        <label for="crossName">Nome do Membro Cross</label>
-        <select
-          id="crossName"
-          [(ngModel)]="newActivity.crossName"
-          name="crossName"
-          required
-          formControlName="crossName"
-        >
-          <option value="">Selecione o Membro Cross</option>
-          <option *ngFor="let membro of membros" [value]="membro">
-            {{ membro }}
-          </option>
-        </select>
-      </div>
-
       <div class="form-group">
         <label for="squad">Squad</label>
         <select
@@ -147,6 +130,7 @@
           name="squad"
           required
           formControlName="squad"
+          (ngModelChange)="onSquadChange($event)"
         >
           <option value="">Selecione a Squad</option>
           <option *ngFor="let squad of squads" [value]="squad">
@@ -154,6 +138,22 @@
           </option>
         </select>
       </div>
+      <div class="form-group">
+        <label for="crossName">Colaborador</label>
+        <select
+          id="crossName"
+          [(ngModel)]="newActivity.crossName"
+          name="crossName"
+          required
+          formControlName="crossName"
+        >
+          <option value="">Selecione o colaborador</option>
+          <option *ngFor="let member of members" [value]="member">
+            {{ member }}
+          </option>
+        </select>
+      </div>
+
       <div class="form-group">
         <label for="prioridade">Prioridade</label>
         <select

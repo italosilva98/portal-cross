@@ -1,10 +1,10 @@
-import { ISquadRequests, ICrossAllocations, ITaskBoard } from './indexeddb.model';
+import { ISquadRequests, ITaskBoard } from './indexeddb.model';
 
 // Store Names
-export type StoreName = 'squadRequests' | 'crossAllocations' | 'taskBoard';
+export type StoreName = 'squadRequests' | 'taskBoard';
 
 // Index Names
 export type IndexName = `by-${string}`;
 
 // Entidades Aceitas para o Genérico T
-export type EntityType = ISquadRequests | ICrossAllocations | ITaskBoard;
+export type EntityType = ISquadRequests | ITaskBoard;

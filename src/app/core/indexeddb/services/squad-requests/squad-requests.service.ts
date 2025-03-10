@@ -17,6 +17,16 @@ export class SquadRequestsService {
     return this.baseDB.getByIndex(SquadRequestsDB.nome, 'by-squad', squad);
   }
 
+  getRequestsByCrossName(
+    crossName: string
+  ): Promise<ISquadRequests[]> {
+    return this.baseDB.getByIndex(
+      SquadRequestsDB.nome,
+      'by-crossName',
+      crossName
+    );
+  }
+
   addSquadRequests(data: ISquadRequests): Promise<string> {
     return this.baseDB.add(SquadRequestsDB.nome, data);
   }

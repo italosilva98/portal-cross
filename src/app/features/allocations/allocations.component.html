@@ -1,4 +1,4 @@
-<h2 class="mb-40">Gerenciamento Membros CROSS</h2>
+<h2 class="mb-40">Gerenciamento Colaboradores CROSS</h2>
 
 <div class="filter-container">
   <div class="filter-group">
@@ -7,60 +7,117 @@
 
   <div class="filter-group">
     <div class="add-activity-button">
-      <button (click)="openNewAllocationModal()">Adicionar Alocação</button>
+      <button (click)="openModal()">Adicionar Alocação</button>
     </div>
   </div>
 </div>
 <div class="allocation-list">
   <div class="allocation-card" *ngFor="let allocation of allocations">
-    <h3>{{ allocation.name }}</h3>
+    <h3>{{ allocation.crossName }}</h3>
     <p>Squad: {{ allocation.squad }}</p>
-    <p>Horas Alocadas: {{ allocation.hours }}h</p>
+    <p>Horas Alocadas: {{ allocation.allocatedHours }}h</p>
+    <p>Release: {{ allocation.release }}</p>
     <p>sprint: {{ allocation.sprint }}</p>
-    <button (click)="editAllocation(allocation)">Editar</button>
+    <button (click)="updateActivity(allocation)">Editar</button>
     <button (click)="deleteAllocation(allocation.id)">Excluir</button>
   </div>
 </div>
 
-<!-- Modal para Novo allocation -->
-<div class="modal" *ngIf="isModalOpen">
+<div class="modal" [ngClass]="{ show: isModalOpen }">
   <div class="modal-content">
+    <span class="close-button" (click)="closeModal()">&times;</span>
     <h3>{{ isEditing ? "Editar Alocação" : "Nova Alocação" }}</h3>
-    <form (submit)="saveAllocation()">
-      <input
-        type="text"
-        placeholder="Nome do CROSS"
-        [(ngModel)]="allocationForm.name"
-        name="name"
-        required
-      />
-      <input
-        type="text"
-        placeholder="Squad Solicitante"
-        [(ngModel)]="allocationForm.squad"
-        name="squad"
-        required
-      />
-      <input
-        type="text"
-        placeholder="Sprint"
-        [(ngModel)]="allocationForm.sprint"
-        name="sprint"
-        required
-      />
+    <hr />
+    <form class="grid-form" [formGroup]="allocationForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="crossName">Colaborador</label>
+        <select
+          id="crossName"
+          [(ngModel)]="newAllocation.crossName"
+          name="crossName"
+          required
+          formControlName="crossName"
+        >
+          <option value="">Selecione o colaborador</option>
+          <option *ngFor="let member of members" [value]="member">
+            {{ member }}
+          </option>
+        </select>
+      </div>
 
-      <input
-        type="number"
-        placeholder="Horas Alocadas"
-        [(ngModel)]="allocationForm.hours"
-        name="hours"
-        required
-      />
+      <div class="form-group">
+        <label for="release">Release</label>
+        <select id="release" formControlName="release">
+          <option value="">Selecione a Release</option>
+          <option *ngFor="let release of releases" [value]="release">
+            {{ release }}
+          </option>
+        </select>
+      </div>
 
-      <textarea id="textArea" name="textArea" cols="40" rows="5"></textarea>
+      <div class="form-group">
+        <label for="sprint">Sprint</label>
+        <select id="sprint" formControlName="sprint">
+          <option value="">Selecione a Sprint</option>
+          <option *ngFor="let sprint of sprints" [value]="sprint">
+            {{ sprint }}
+          </option>
+        </select>
+      </div>
 
-      <button type="submit">Salvar</button>
-      <button type="button" (click)="closeModal()">Cancelar</button>
+      <div class="form-group">
+        <label for="squad">Squad</label>
+        <select
+          id="squad"
+          [(ngModel)]="newAllocation.squad"
+          name="squad"
+          required
+          formControlName="squad"
+          (ngModelChange)="onSquadChange($event)"
+        >
+          <option value="">Selecione a Squad</option>
+          <option *ngFor="let squad of squads" [value]="squad">
+            {{ squad }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="allocatedHours">Horas Alocadas</label>
+        <input
+          type="number"
+          id="allocatedHours"
+          formControlName="allocatedHours"
+          placeholder="Horas Alocadas"
+          min="1"
+        />
+      </div>
+
+
+      <div class="form-group">
+        <label for="textArea">Descrição</label>
+        <textarea
+          id="textArea"
+          name="textArea"
+          cols="40"
+          rows="5"
+          formControlName="descricao"
+        ></textarea>
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit" class="save-button">
+          {{ isEditing ? "Atualizar" : "Salvar" }} Atividade
+        </button>
+        <button
+          type="button"
+          class="delete-button"
+          *ngIf="isEditing"
+
+        >
+          Excluir
+        </button>
+      </div>
     </form>
   </div>
 </div>

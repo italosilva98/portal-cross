@@ -1,6 +1,6 @@
 <div class="filter-container">
   <div class="filter-group" *ngIf="flowType === 'cross'">
-    <label>Membro CROSS:</label>
+    <label>Colaborador:</label>
     <select
       [(ngModel)]="selectedMember"
       (ngModelChange)="onFilterChange($event, 'member')"
@@ -47,7 +47,7 @@
   </div>
 
   <div class="filter-group" *ngIf="flowType === 'squad'">
-    <label>Membro:</label>
+    <label>Colaborador:</label>
     <select
       [(ngModel)]="selectedMember"
       (ngModelChange)="onFilterChange($event, 'member')"
@@ -70,4 +70,9 @@
       </option>
     </select>
   </div>
+
+  <div class="clear-filters">
+    <button (click)="cleanFilters()">Limpar Filtros</button>
+  </div>
+
 </div>

@@ -1,18 +1,26 @@
-import { Component, Input } from '@angular/core';
+import {
+  AfterContentInit,
+  Component,
+  ContentChild,
+  Input,
+} from '@angular/core';
 import Chart from 'chart.js/auto';
 import { ITaskBoard } from '@indexeddb/models/indexeddb.model';
 import { TaskService } from '@indexeddb/services/task/task.service';
-import { SQUAD_MEMBERS } from '@constants/squad.constants';
+import { CROSS_MEMBERS, SQUAD_MEMBERS } from '@constants/squad.constants';
+import { CustomFilterComponent } from '@components/custom-filter/custom-filter.component';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
-export class DashboardComponent {
-  @Input() flow: string = '';
+export class DashboardComponent implements AfterContentInit {
+  @Input() flowType: string = '';
+  @ContentChild(CustomFilterComponent) filter!: CustomFilterComponent;
 
   activities: ITaskBoard[] = [];
+  activitiesBackup: ITaskBoard[] = [];
   reportData: any[] = [];
 
   reports: any;
@@ -20,6 +28,10 @@ export class DashboardComponent {
   squadMembers = SQUAD_MEMBERS;
 
   reportTasks: any[] = [];
+  selectedMember: string = 'Todos';
+  selectedRelease: string = 'Todos';
+  selectedSprint: string = 'Todos';
+  selectedSquad: string = 'Todos';
   totalReport: {
     allocatedHours: number;
     spentHours: number;
@@ -32,12 +44,89 @@ export class DashboardComponent {
     pendingTasks: 0,
   };
 
-  membros = ['Todos', 'Italo Silvestre', 'Luiz Arquiteto', 'Gabriel UX'];
-
+  members: string[] = [];
+  private hoursBySquadChart: Chart | null = null;
+  private hoursSpentBySquadChart: Chart | null = null;
+  private taskStatusChart: Chart | null = null;
   constructor(private taskService: TaskService) {}
 
   async ngOnInit() {
+    if (this.flowType === 'cross') {
+      this.members = CROSS_MEMBERS;
+    }
     this.getActivity();
+  }
+
+  ngAfterContentInit(): void {
+    if (this.filter) {
+      this.filter.filterChangeEmmiter.subscribe((filter) => {
+        this.onFilterChange(filter.value, filter.event);
+      });
+
+      this.filter.cleanFilterEmitter.subscribe((isCleanFilter) => {
+        if (isCleanFilter) {
+          this.onCleanFilter();
+        }
+      });
+    }
+  }
+
+  onCleanFilter() {
+    this.selectedMember = 'Todos';
+    this.selectedSprint = 'Todos';
+    this.selectedRelease = 'Todos';
+    this.selectedSquad = 'Todos';
+    this.selectedSquad = 'Todos';
+    this.getActivity();
+  }
+
+  onFilterChange(newValue: string, type: string): void {
+    // Atualiza os filtros com base no tipo
+    if (type === 'member') {
+      this.selectedMember = newValue;
+    } else if (type === 'release') {
+      this.selectedRelease = newValue;
+    } else if (type === 'sprint') {
+      this.selectedSprint = newValue;
+    } else if (type === 'squad') {
+      this.selectedSquad = newValue;
+    }
+
+    // Se todos os filtros estão em "Todos", mostra todas as atividades
+    if (
+      this.selectedMember === 'Todos' &&
+      this.selectedSprint === 'Todos' &&
+      this.selectedRelease === 'Todos' &&
+      this.selectedSquad === 'Todos'
+    ) {
+      this.getActivity();
+      return;
+    }
+
+    // Filtragem composta com base nos filtros selecionados
+    this.activities = this.activitiesBackup.filter((task) => {
+      const conditions = [];
+
+      // Adiciona condições dinamicamente
+      if (this.selectedMember !== 'Todos') {
+        conditions.push(task.crossName === this.selectedMember);
+      }
+      if (this.selectedRelease !== 'Todos') {
+        conditions.push(task.release === this.selectedRelease);
+      }
+      if (this.selectedSprint !== 'Todos') {
+        conditions.push(task.sprint === this.selectedSprint);
+      }
+      if (this.selectedSquad !== 'Todos') {
+        conditions.push(task.squad === this.selectedSquad);
+      }
+
+      // Verifica se todas as condições são verdadeiras
+      return conditions.every(Boolean);
+    });
+
+    console.log('act: ', this.activities);
+    this.createDashBoards(this.activities);
   }
 
   transformToReportData(activities: any[]): any[] {
@@ -112,12 +201,16 @@ export class DashboardComponent {
 
   getActivity() {
     this.taskService.getAllTasks().then((response) => {
-      this.reportData = this.transformToReportData(response);
-      this.reportTasks = this.transformToReportTask(response);
-      this.totalReport = this.transformToTotalReport(response);
-      console.log('rep: ', this.reportData);
-      this.createCharts();
+      this.activitiesBackup = response;
+      this.createDashBoards(response);
     });
+  }
+
+  createDashBoards(response: any) {
+    this.reportData = this.transformToReportData(response);
+    this.reportTasks = this.transformToReportTask(response);
+    this.totalReport = this.transformToTotalReport(response);
+    this.createCharts();
   }
 
   createCharts() {
@@ -134,68 +227,96 @@ export class DashboardComponent {
       return colors.slice(0, numColors);
     };
 
-    new Chart('hoursBySquadChart', {
-      type: 'pie',
-      data: {
-        labels: this.reportData.map((data) => data.squad),
-        datasets: [
-          {
-            data: this.reportData.map((data) => data.allocatedHours),
-            backgroundColor: generateColors(this.reportData.length),
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
+    if (this.hoursBySquadChart) {
+      this.hoursBySquadChart.data.labels = this.reportData.map(
+        (data) => data.squad
+      );
+      this.hoursBySquadChart.data.datasets[0].data = this.reportData.map(
+        (data) => data.allocatedHours
+      );
+      this.hoursBySquadChart.update();
+    } else {
+      this.hoursBySquadChart = new Chart('hoursBySquadChart', {
+        type: 'pie',
+        data: {
+          labels: this.reportData.map((data) => data.squad),
+          datasets: [
+            {
+              data: this.reportData.map((data) => data.allocatedHours),
+              backgroundColor: generateColors(this.reportData.length),
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
           },
         },
-      },
-    });
-
-    new Chart('hoursSpentBySquadChart', {
-      type: 'pie',
-      data: {
-        labels: this.reportData.map((data) => data.squad),
-        datasets: [
-          {
-            data: this.reportData.map((data) => data.spentHours),
-            backgroundColor: generateColors(this.reportData.length),
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
+      });
+    }
+    if (this.hoursSpentBySquadChart) {
+      this.hoursSpentBySquadChart.data.labels = this.reportData.map(
+        (data) => data.squad
+      );
+      this.hoursSpentBySquadChart.data.datasets[0].data = this.reportData.map(
+        (data) => data.allocatedHours
+      );
+      this.hoursSpentBySquadChart.update();
+    } else {
+      this.hoursSpentBySquadChart = new Chart('hoursSpentBySquadChart', {
+        type: 'pie',
+        data: {
+          labels: this.reportData.map((data) => data.squad),
+          datasets: [
+            {
+              data: this.reportData.map((data) => data.spentHours),
+              backgroundColor: generateColors(this.reportData.length),
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
           },
         },
-      },
-    });
-
-    new Chart('taskStatusChart', {
-      type: 'bar',
-      data: {
-        labels: this.reportTasks.map((data) => data.label),
-        datasets: [
-          {
-            label: 'Tarefas',
-            data: this.reportTasks.map((data) => data.task),
-            backgroundColor: generateColors(this.reportTasks.length),
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false,
+      });
+    }
+    if (this.taskStatusChart) {
+      this.taskStatusChart.data.labels = this.reportData.map(
+        (data) => data.squad
+      );
+      this.taskStatusChart.data.datasets[0].data = this.reportData.map(
+        (data) => data.allocatedHours
+      );
+      this.taskStatusChart.update();
+    } else {
+      this.taskStatusChart = new Chart('taskStatusChart', {
+        type: 'bar',
+        data: {
+          labels: this.reportTasks.map((data) => data.label),
+          datasets: [
+            {
+              label: 'Tarefas',
+              data: this.reportTasks.map((data) => data.task),
+              backgroundColor: generateColors(this.reportTasks.length),
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: false,
+            },
           },
         },
-      },
-    });
+      });
+    }
   }
 }

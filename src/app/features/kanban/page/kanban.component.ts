@@ -1,4 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  AfterContentInit,
+  ChangeDetectorRef,
+  Component,
+  ContentChild,
+  Input,
+  OnInit,
+} from '@angular/core';
 import {
   CdkDragDrop,
   moveItemInArray,
@@ -15,19 +22,24 @@ import {
   RELEASES,
   SPRINTS,
   SQUAD_MEMBERS,
+  SquadKey,
 } from '@constants/squad.constants';
+import { CustomFilterComponent } from '@components/custom-filter/custom-filter.component';
 
 @Component({
   selector: 'app-kanban',
   templateUrl: './kanban.component.html',
   styleUrls: ['./kanban.component.scss'],
 })
-export class KanbanComponent implements OnInit {
+export class KanbanComponent  implements OnInit, AfterContentInit {
+  @Input() flowType: string = '';
+  @ContentChild(CustomFilterComponent) filter!: CustomFilterComponent;
+
   board: Column[] = [];
   activities: ITaskBoard[] = [];
   activitiesBackup: ITaskBoard[] = [];
 
-  membros = CROSS_MEMBERS;
+  members: string[] = [];
   sprints = SPRINTS;
   releases = RELEASES;
   squads = Object.keys(SQUAD_MEMBERS);
@@ -75,14 +87,44 @@ export class KanbanComponent implements OnInit {
     prioridade: '',
   };
 
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService, private cd: ChangeDetectorRef) {}
 
   ngOnInit() {
+    if (this.flowType === 'cross') {
+      this.members = CROSS_MEMBERS;
+    }
     this.getActivity();
   }
 
+  ngAfterContentInit(): void {
+    if (this.filter) {
+      this.filter.filterChangeEmmiter.subscribe((filter) => {
+        this.onFilterChange(filter.value, filter.event);
+      });
+
+      this.filter.cleanFilterEmitter.subscribe((isCleanFilter) => {
+        if (isCleanFilter) {
+          this.onCleanFilter();
+        }
+      });
+    }
+  }
+
+  onCleanFilter() {
+    this.selectedMember = 'Todos';
+    this.selectedSprint = 'Todos';
+    this.selectedRelease = 'Todos';
+    this.selectedSquad = 'Todos';
+    this.selectedPriority = 'Todos';
+    this.activities = [...this.activitiesBackup];
+    this.createBoard(this.activities)
+  }
+  onSquadChange(squad: string) {
+    if (this.flowType === 'squad')
+      this.members = SQUAD_MEMBERS[squad as SquadKey];
+  }
+
   updateActivity(task: any) {
-    console.log(task);
     this.isEditing = true;
     this.editActivityId = task.id;
 
@@ -94,7 +136,6 @@ export class KanbanComponent implements OnInit {
   filterById(id: string) {
     // Procura a coluna que contém a tarefa com o ID desejado
     const column = this.activities.find((col) => col.id === id);
-    console.log('colum:', column);
     // Se encontrou a coluna, filtra as tasks e retorna o objeto completo
     if (column) {
       this.activityForm.patchValue({
@@ -111,6 +152,7 @@ export class KanbanComponent implements OnInit {
       });
     }
   }
+
   openModal() {
     this.isModalOpen = true;
   }

@@ -9,14 +9,6 @@ export interface ISquadRequests {
   allocatedHours: number;
 }
 
-export interface ICrossAllocations {
-  id: string;
-  crossName: string;
-  availableHours: number;
-  sprint: string;
-  release: string;
-}
-
 export interface ITaskBoard {
   id: string;
   title: string;
@@ -43,10 +35,5 @@ export interface AppDB extends DBSchema {
     key: string;
     value: ITaskBoard;
     indexes: Record<`by-${string}`, string>;
-  };
-  crossAllocations: {
-    key: string;
-    value: ICrossAllocations;
-    indexes: Record<`by-${string}`, string>;
-  };
+  }
 }

@@ -15,16 +15,16 @@
     [class.minimized]="isMinimized"
     [ngSwitch]="currentRoute"
   >
-    <app-dashboard *ngSwitchCase="'dashboard'">
+    <app-dashboard *ngSwitchCase="'dashboard'" >
       <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
     </app-dashboard>
-    <app-allocations *ngSwitchCase="'allocations'">
+    <app-allocations *ngSwitchCase="'allocations'" [flowType]="flowType">
       <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
     </app-allocations>
-    <app-kanban *ngSwitchCase="'kanban'">
+    <app-kanban *ngSwitchCase="'kanban'" [flowType]="flowType">
       <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
     </app-kanban>
-    <app-activity-log *ngSwitchCase="'activities'" [flow]="flowType">
+    <app-activity-log *ngSwitchCase="'activities'" [flowType]="flowType">
       <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
     </app-activity-log>
   </div>

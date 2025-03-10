@@ -2,12 +2,10 @@ import { Injectable } from '@angular/core';
 import { openDB, IDBPDatabase } from 'idb';
 import {
   AppDB,
-  ICrossAllocations,
   ISquadRequests,
   ITaskBoard,
 } from '../models/indexeddb.model';
 import {
-  CrossAllocationsDB,
   IndexedDB,
   SquadRequestsDB,
   TaskBoardDB,
@@ -82,29 +80,6 @@ export class IndexedDBService {
   }
 
   // FIM TASKS
-
-  // INICIO CROSS
-  async getAllCrossMember(): Promise<ICrossAllocations[]> {
-    return (await this._db).getAll(CrossAllocationsDB.nome);
-  }
-
-  async getCrossMemberById(id: string): Promise<ICrossAllocations[]> {
-    const cross = await (await this._db).get(CrossAllocationsDB.nome, id);
-    return cross ? [cross] : [];
-  }
-
-  async addCrossAllocations(crossData: ICrossAllocations): Promise<string> {
-    return (await this._db).add(CrossAllocationsDB.nome, crossData);
-  }
-
-  async updateCrossAllocations(crossData: ICrossAllocations): Promise<string> {
-    return (await this._db).put(CrossAllocationsDB.nome, crossData);
-  }
-
-  async deleteCrossAllocations(id: string): Promise<void> {
-    return (await this._db).delete(CrossAllocationsDB.nome, id);
-  }
-  // FIM CROSS
 
   // INICIO SQUAD
   async getAllSquadRequests(): Promise<ISquadRequests[]> {
