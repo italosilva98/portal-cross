@@ -29,7 +29,7 @@ export abstract class BaseActivityComponent implements OnInit {
       Validators.min(1),
     ]),
     spentHours: new FormControl(0, [Validators.required, Validators.min(0)]),
-    crossName: new FormControl('', Validators.required),
+    employeeName: new FormControl('', Validators.required),
     squad: new FormControl('', Validators.required),
     prioridade: new FormControl(''),
   });
@@ -74,7 +74,7 @@ export abstract class BaseActivityComponent implements OnInit {
     this.activities = this.activitiesBackup.filter((task) => {
       const conditions = [];
       if (this.selectedMember !== 'Todos') {
-        conditions.push(task.crossName === this.selectedMember);
+        conditions.push(task.employeeName === this.selectedMember);
       }
       if (this.selectedRelease !== 'Todos') {
         conditions.push(task.release === this.selectedRelease);

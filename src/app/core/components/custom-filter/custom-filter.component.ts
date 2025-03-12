@@ -7,6 +7,7 @@ import {
   SQUAD_MEMBERS,
   SquadKey,
 } from '@constants/squad.constants';
+import { Filter } from 'src/app/shared/models/filter.model';
 
 @Component({
   selector: 'app-custom-filter',
@@ -15,6 +16,8 @@ import {
 })
 export class CustomFilterComponent implements OnInit {
   @Input() flowType: string = '';
+  @Input() showPriority: boolean = true;
+  @Input() selectedFilter!: Filter;
   @Output() filterChangeEmmiter = new EventEmitter<{
     event: string;
     value: string;
@@ -34,10 +37,37 @@ export class CustomFilterComponent implements OnInit {
   selectedSquad: string = 'Todos';
   selectedPriority: string = 'Todos';
 
+
   ngOnInit(): void {
+    // this.eventBusService.getEvent<Filter>('filter').subscribe((filter) => {
+    //   if (filter) {
+    //     this.selectedRelease = filter.release;
+    //     this.selectedSprint = filter.sprint;
+    //     this.selectedSquad = filter.squad;
+    //   }
+    // });
+
     if (this.flowType === 'cross') {
       this.members = CROSS_MEMBERS;
     }
+
+    // if (this.selectedFilter) {
+    //   this.selectedRelease = this.selectedFilter.release;
+    //   this.selectedSprint = this.selectedFilter.sprint;
+    //   this.selectedSquad = this.selectedFilter.squad
+    //   this.filterChangeEmmiter.emit({
+    //     event: 'squad',
+    //     value: this.selectedSquad
+    //   })
+    //   this.filterChangeEmmiter.emit({
+    //     event: 'release',
+    //     value: this.selectedRelease
+    //   })
+    //   this.filterChangeEmmiter.emit({
+    //     event: 'sprint',
+    //     value: this.selectedSprint
+    //   })
+    // }
   }
 
   onFilterChange(newValue: string, type: string): void {

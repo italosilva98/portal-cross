@@ -13,7 +13,7 @@
 </div>
 <div class="allocation-list">
   <div class="allocation-card" *ngFor="let allocation of allocations">
-    <h3>{{ allocation.crossName }}</h3>
+    <h3>{{ allocation.employeeName }}</h3>
     <p>Squad: {{ allocation.squad }}</p>
     <p>Horas Alocadas: {{ allocation.allocatedHours }}h</p>
     <p>Release: {{ allocation.release }}</p>
@@ -30,13 +30,13 @@
     <hr />
     <form class="grid-form" [formGroup]="allocationForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="crossName">Colaborador</label>
+        <label for="employeeName">Colaborador</label>
         <select
-          id="crossName"
-          [(ngModel)]="newAllocation.crossName"
-          name="crossName"
+          id="employeeName"
+          [(ngModel)]="newAllocation.employeeName"
+          name="employeeName"
           required
-          formControlName="crossName"
+          formControlName="employeeName"
         >
           <option value="">Selecione o colaborador</option>
           <option *ngFor="let member of members" [value]="member">

@@ -7,8 +7,15 @@
 .allocation-card {
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
+
   padding: 20px;
+}
+
+.allocation-card:hover {
+  // transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .allocation-card h3 {

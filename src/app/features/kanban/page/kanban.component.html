@@ -33,8 +33,8 @@
       >
         <h4>{{ task.title }}</h4>
         <p>{{ task.description }}</p>
-        <span [ngClass]="getPriorityClass(task.prioridade)"
-          >Prioridade: {{ task.prioridade }}</span
+        <span [ngClass]="getPriorityClass(task.priority)"
+          >Prioridade: {{ task.priority }}</span
         >
 
         <!-- Placeholder Customizado -->
@@ -139,13 +139,13 @@
         </select>
       </div>
       <div class="form-group">
-        <label for="crossName">Colaborador</label>
+        <label for="employeeName">Colaborador</label>
         <select
-          id="crossName"
-          [(ngModel)]="newActivity.crossName"
-          name="crossName"
+          id="employeeName"
+          [(ngModel)]="newActivity.employeeName"
+          name="employeeName"
           required
-          formControlName="crossName"
+          formControlName="employeeName"
         >
           <option value="">Selecione o colaborador</option>
           <option *ngFor="let member of members" [value]="member">
@@ -155,17 +155,17 @@
       </div>
 
       <div class="form-group">
-        <label for="prioridade">Prioridade</label>
+        <label for="priority">Prioridade</label>
         <select
-          id="prioridade"
-          [(ngModel)]="newActivity.prioridade"
-          name="prioridade"
+          id="priority"
+          [(ngModel)]="newActivity.priority"
+          name="priority"
           required
-          formControlName="prioridade"
+          formControlName="priority"
         >
           <option value="">Selecione a prioridade</option>
-          <option *ngFor="let prioridade of prioridades" [value]="prioridade">
-            {{ prioridade }}
+          <option *ngFor="let priority of prioridades" [value]="priority">
+            {{ priority }}
           </option>
         </select>
       </div>

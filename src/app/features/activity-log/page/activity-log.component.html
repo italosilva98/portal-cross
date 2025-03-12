@@ -39,6 +39,21 @@
       </div>
 
       <div class="form-group">
+        <label for="priority">priority</label>
+        <select
+          id="priority"
+          name="priority"
+          required
+          formControlName="priority"
+        >
+          <option value="">Selecione a prioridade</option>
+          <option *ngFor="let priority of priorities" [value]="priority">
+            {{ priority }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label for="status">Status</label>
         <select id="status" formControlName="status">
           <option value="">Selecione o Status</option>
@@ -73,7 +88,6 @@
         <label for="squad">Squad</label>
         <select
           id="squad"
-          [(ngModel)]="newActivity.squad"
           name="squad"
           required
           formControlName="squad"
@@ -87,15 +101,13 @@
       </div>
 
       <div class="form-group">
-        <label for="crossName">Colaborador</label>
+        <label for="employeeName">Colaborador</label>
         <select
-          id="crossName"
-          [(ngModel)]="newActivity.crossName"
-          name="crossName"
+          id="employeeName"
+          name="employeeName"
           required
-          formControlName="crossName"
-          (ngModelChange)="onCrossNameChange($event)"
-
+          formControlName="employeeName"
+          (ngModelChange)="onEmployeeNameChange($event)"
         >
           <option value="">Selecione o Colaborador</option>
           <option *ngFor="let member of members" [value]="member">
@@ -105,34 +117,68 @@
       </div>
 
       <div class="form-group">
-        <label for="allocatedHours">Horas Alocadas</label>
+        <label for="allocatedHours">Horas Atividade</label>
         <input
           type="number"
           id="allocatedHours"
           formControlName="allocatedHours"
-          placeholder="Horas Alocadas"
-          min="1"
+          placeholder="Horas Atividade"
+          min="0"
+          (ngModelChange)="onAllocatedHoursChange($event)"
         />
       </div>
       <div class="form-group">
-        <label for="totalAllocatedHours">Horas Alocadas Total</label>
+        <label for="totalAllocatedHours"
+          >Horas Totais Alocadas para Squad</label
+        >
         <input
-          [(ngModel)]="totalAllocatedHours"
           type="number"
+          disabled
           id="totalAllocatedHours"
-          placeholder="Horas Alocadas Total"
+          [value]="totalAllocatedHours"
         />
       </div>
 
       <div class="form-group">
-        <label for="spentHours">Horas Gastas</label>
+        <label for="spentHours">Horas Sobrando</label>
         <input
+          disabled
           type="number"
           id="spentHours"
-          formControlName="spentHours"
           placeholder="Horas Gastas"
-          min="0"
+          [value]="totalSpentAllocatedHours"
         />
+      </div>
+
+      <!-- NOVA SEÇÃO: Cadastro de tarefas dentro da história -->
+      <div class="form-group tasks-section" formArrayName="tasks">
+        <h4>Tarefas da História</h4>
+        <div
+          *ngFor="let task of tasks.controls; let i = index"
+          [formGroupName]="i"
+          class="task-group"
+        >
+          <div class="form-group">
+            <label>Título da Tarefa</label>
+            <input
+              type="text"
+              formControlName="title"
+              placeholder="Título da Tarefa"
+            />
+          </div>
+          <div class="form-group">
+            <label>Descrição da Tarefa</label>
+            <input
+              type="text"
+              formControlName="description"
+              placeholder="Descrição da Tarefa"
+            />
+          </div>
+          <button type="button" (click)="removeTask(i)">Remover Tarefa</button>
+        </div>
+        <div class="add-task-button">
+          <button type="button" (click)="addTask()">Adicionar Tarefa</button>
+        </div>
       </div>
 
       <div class="form-buttons">
@@ -161,14 +207,28 @@
     <h4>{{ activity.title }}</h4>
     <hr />
     <p>{{ activity.description }}</p>
-    <p>Status: {{ activity.status }}</p>
-    <p>Sprint: {{ activity.sprint }}</p>
-    <p>Release: {{ activity.release }}</p>
-    <p>Horas Alocadas: {{ activity.allocatedHours }}</p>
-    <p>Horas Gastas: {{ activity.spentHours }}</p>
-    <p>Nome do Cross: {{ activity.crossName }}</p>
-    <p>Squad: {{ activity.squad }}</p>
-    <p>Data de Criação: {{ activity.createdDate | date : "dd/MM/yyyy" }}</p>
-    <p>Data de Atualização: {{ activity.updatedDate | date : "dd/MM/yyyy" }}</p>
+    <p><b>Status:</b> {{ activity.status }}</p>
+    <p><b>Prioridade:</b> {{ activity.priority }}</p>
+    <p><b>Sprint:</b> {{ activity.sprint }}</p>
+    <p><b>Release:</b> {{ activity.release }}</p>
+    <p><b>Horas Alocadas:</b> {{ activity.allocatedHours }}</p>
+    <p><b>Horas Gastas:</b> {{ activity.spentHours }}</p>
+    <p><b>Colaborador:</b> {{ activity.employeeName }}</p>
+    <p>
+      <b>Data de Criação:</b>
+      {{ activity.createdDate | date : "dd/MM/yyyy" }}
+    </p>
+    <p>
+      <b>Data de Atualização:</b>
+      {{ activity.updatedDate | date : "dd/MM/yyyy" }}
+    </p>
+    <ng-container *ngIf="activity.tasks && activity.tasks.length">
+      <b>Tarefas:</b>
+      <ul>
+        <li *ngFor="let task of activity.tasks">
+          {{ task["title"] }} - {{ task["description"] }}
+        </li>
+      </ul>
+    </ng-container>
   </li>
 </ul>

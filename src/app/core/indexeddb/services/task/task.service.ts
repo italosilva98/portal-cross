@@ -24,8 +24,8 @@ export class TaskService {
     return this.baseDB.getByIndex(TaskBoardDB.nome, 'by-release', release);
   }
 
-  getTasksByCrossName(crossName: string): Promise<ITaskBoard[]> {
-    return this.baseDB.getByIndex(TaskBoardDB.nome, 'by-crossName', crossName);
+  getTasksByEmployeeName(employeeName: string): Promise<ITaskBoard[]> {
+    return this.baseDB.getByIndex(TaskBoardDB.nome, 'by-employeeName', employeeName);
   }
 
   getTasksByStatus(status: string): Promise<ITaskBoard[]> {

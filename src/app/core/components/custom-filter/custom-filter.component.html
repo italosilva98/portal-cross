@@ -58,7 +58,7 @@
       </option>
     </select>
   </div>
-  <div class="filter-group">
+  <div class="filter-group" *ngIf="showPriority">
     <label>Prioridade:</label>
     <select
       [(ngModel)]="selectedPriority"

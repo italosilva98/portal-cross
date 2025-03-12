@@ -2,7 +2,7 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  prioridade: string
+  priority: string
 }
 
 export interface Column {

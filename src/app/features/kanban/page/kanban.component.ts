@@ -24,7 +24,7 @@ import {
   SQUAD_MEMBERS,
   SquadKey,
 } from '@constants/squad.constants';
-import { CustomFilterComponent } from '@components/custom-filter/custom-filter.component';
+import { CustomFilterComponent } from 'src/app/core/components/custom-filter/custom-filter.component';
 
 @Component({
   selector: 'app-kanban',
@@ -65,9 +65,9 @@ export class KanbanComponent  implements OnInit, AfterContentInit {
       Validators.min(1),
     ]),
     spentHours: new FormControl(0, [Validators.required, Validators.min(0)]),
-    crossName: new FormControl('', Validators.required),
+    employeeName: new FormControl('', Validators.required),
     squad: new FormControl('', Validators.required),
-    prioridade: new FormControl('', Validators.required),
+    priority: new FormControl('', Validators.required),
   });
   connectedLists: string[] = [];
 
@@ -80,11 +80,11 @@ export class KanbanComponent  implements OnInit, AfterContentInit {
     release: '',
     allocatedHours: 0,
     spentHours: 0,
-    crossName: '',
+    employeeName: '',
     createdDate: new Date(),
     updatedDate: new Date(),
     squad: '',
-    prioridade: '',
+    priority: '',
   };
 
   constructor(private taskService: TaskService, private cd: ChangeDetectorRef) {}
@@ -146,9 +146,9 @@ export class KanbanComponent  implements OnInit, AfterContentInit {
         sprint: column.sprint,
         allocatedHours: column.allocatedHours,
         spentHours: column.spentHours,
-        crossName: column.crossName,
+        employeeName: column.employeeName,
         squad: column.squad,
-        prioridade: column.prioridade,
+        priority: column.priority,
       });
     }
   }
@@ -246,7 +246,7 @@ export class KanbanComponent  implements OnInit, AfterContentInit {
         id: task.id,
         title: task.title,
         description: task.description,
-        prioridade: task.prioridade,
+        priority: task.priority,
       });
       return groups;
     }, {} as Record<string, Task[]>);
@@ -306,7 +306,7 @@ export class KanbanComponent  implements OnInit, AfterContentInit {
 
       // Adiciona condições dinamicamente
       if (this.selectedMember !== 'Todos') {
-        conditions.push(task.crossName === this.selectedMember);
+        conditions.push(task.employeeName === this.selectedMember);
       }
       if (this.selectedRelease !== 'Todos') {
         conditions.push(task.release === this.selectedRelease);
@@ -318,7 +318,7 @@ export class KanbanComponent  implements OnInit, AfterContentInit {
         conditions.push(task.squad === this.selectedSquad);
       }
       if (this.selectedPriority !== 'Todos') {
-        conditions.push(task.prioridade === this.selectedPriority);
+        conditions.push(task.priority === this.selectedPriority);
       }
 
       // Verifica se todas as condições são verdadeiras

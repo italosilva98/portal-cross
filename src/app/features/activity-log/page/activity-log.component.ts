@@ -5,14 +5,15 @@ import {
   Input,
   OnInit,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ITaskBoard } from '@indexeddb/models/indexeddb.model';
 import { TaskService } from '@indexeddb/services/task/task.service';
-import { CustomFilterComponent } from '@components/custom-filter/custom-filter.component';
+import { CustomFilterComponent } from 'src/app/core/components/custom-filter/custom-filter.component';
 import {
   CROSS_MEMBERS,
+  PRIORITIES,
   RELEASES,
   SPRINTS,
   SQUAD_MEMBERS,
@@ -38,6 +39,8 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
   selectedSprint: string = 'Todos';
   selectedSquad: string = 'Todos';
   totalAllocatedHours = 0;
+  totalSpentAllocatedHours = 0;
+  activitySpentAllocatedHours = 0;
 
   newActivity = {
     id: '',
@@ -47,11 +50,12 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     sprint: '',
     release: '',
     allocatedHours: 0,
-    spentHours: 0,
-    crossName: '',
+    employeeName: '',
     createdDate: new Date(),
     updatedDate: new Date(),
     squad: '',
+    priority: '',
+    tasks: [],
   };
 
   isModalOpen = false;
@@ -68,15 +72,24 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
       Validators.required,
       Validators.min(1),
     ]),
-    spentHours: new FormControl(0, [Validators.required, Validators.min(0)]),
-    crossName: new FormControl('', Validators.required),
+    employeeName: new FormControl('', Validators.required),
     squad: new FormControl('', Validators.required),
+    priority: new FormControl('', Validators.required),
+    tasks: new FormArray([]),
   });
 
   members: string[] = [];
   sprints = SPRINTS;
   releases = RELEASES;
   squads = Object.keys(SQUAD_MEMBERS);
+  priorities = PRIORITIES;
+
+  squadForm: string = '';
+  memberForm: string = '';
+
+  get tasks(): FormArray {
+    return this.activityForm.get('tasks') as FormArray;
+  }
 
   constructor(
     private taskService: TaskService,
@@ -103,6 +116,18 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     this.getActivity();
   }
 
+  addTask(): void {
+    const taskGroup = new FormGroup({
+      title: new FormControl('', Validators.required),
+      description: new FormControl(''),
+    });
+    this.tasks.push(taskGroup);
+  }
+
+  removeTask(index: number): void {
+    this.tasks.removeAt(index);
+  }
+
   onCleanFilter() {
     this.selectedMember = 'Todos';
     this.selectedSprint = 'Todos';
@@ -120,6 +145,7 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     this.isEditing = false;
     this.editActivityId = null;
     this.activityForm.reset();
+    this.tasks.clear();
   }
 
   onSubmit() {
@@ -176,10 +202,25 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
       release: activity.release,
       sprint: activity.sprint,
       allocatedHours: activity.allocatedHours,
-      spentHours: activity.spentHours,
-      crossName: activity.crossName,
+      employeeName: activity.employeeName,
       squad: activity.squad,
+      priority: activity.priority,
     });
+
+    this.squadForm = activity.squad
+    this.getTotalAllocation(activity.employeeName)
+
+    if (activity.tasks && activity.tasks.length) {
+      this.tasks.clear();
+      activity.tasks.forEach((task: any) => {
+        this.tasks.push(
+          new FormGroup({
+            title: new FormControl(task.title, Validators.required),
+            description: new FormControl(task.description),
+          })
+        );
+      });
+    }
 
     this.openModal();
   }
@@ -191,18 +232,33 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     });
   }
 
-  getTotalAllocation(crossName: string) {
-    console.log(crossName);
-    this.squadRequestsService
-      .getRequestsByCrossName(crossName)
-      .then((response) => {
-        this.totalAllocatedHours = response[0].allocatedHours;
-      });
+  getTotalAllocation(employeeName: string) {
+    this.memberForm = employeeName
+    if (this.squadForm !== '') {
+      this.squadRequestsService
+        .getRequestsBySquadAndEmployeeName(this.squadForm, this.memberForm)
+        .then((response) => {
+          if (response[0]?.allocatedHours) {
+            console.log(response);
+            console.log(response[0]);
+            this.totalAllocatedHours = response[0].allocatedHours;
+            this.totalSpentAllocatedHours = this.totalAllocatedHours - this.activitySpentAllocatedHours
+            console.log(this.totalAllocatedHours);
+          }else {
+            this.totalAllocatedHours = 0
+          }
+        });
+    }
   }
 
-  getActivityByCrossName() {
+  onAllocatedHoursChange(hour: number){
+    this.activitySpentAllocatedHours = hour
+
+  }
+
+  getActivityByemployeeName() {
     this.taskService
-      .getTasksByCrossName(this.selectedMember)
+      .getTasksByEmployeeName(this.selectedMember)
       .then((response) => {
         this.activities = response;
 
@@ -227,9 +283,13 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
   onSquadChange(squad: string) {
     if (this.flowType === 'squad')
       this.members = SQUAD_MEMBERS[squad as SquadKey];
+
+    this.squadForm = squad;
+    this.getTotalAllocation(this.memberForm)
   }
-  onCrossNameChange(crossName: string) {
-    this.getTotalAllocation(crossName);
+
+  onEmployeeNameChange(employeeName: string) {
+    this.getTotalAllocation(employeeName);
   }
 
   onFilterChange(newValue: string, type: string): void {
@@ -262,7 +322,7 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
 
       // Adiciona condições dinamicamente
       if (this.selectedMember !== 'Todos') {
-        conditions.push(task.crossName === this.selectedMember);
+        conditions.push(task.employeeName === this.selectedMember);
       }
       if (this.selectedRelease !== 'Todos') {
         conditions.push(task.release === this.selectedRelease);

@@ -12,7 +12,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   flex-grow: 1;
   flex-shrink: 0;
-  min-width: 300px;
+  width: 300px;
 }
 
 .kanban-column h3 {
@@ -192,14 +192,15 @@
 
 @media (max-width: 768px) {
   .kanban-board {
-    flex-direction: column; /* Empilha as colunas verticalmente */
+    flex-direction: column;
+    /* Empilha as colunas verticalmente */
     gap: 10px;
     padding: 10px;
 
   }
 
   .kanban-column {
-    min-width: auto; /* Permite que os cards se ajustem à largura disponível */
+    min-width: auto;
+    /* Permite que os cards se ajustem à largura disponível */
   }
 }
-

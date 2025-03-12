@@ -8,7 +8,7 @@ import Chart from 'chart.js/auto';
 import { ITaskBoard } from '@indexeddb/models/indexeddb.model';
 import { TaskService } from '@indexeddb/services/task/task.service';
 import { CROSS_MEMBERS, SQUAD_MEMBERS } from '@constants/squad.constants';
-import { CustomFilterComponent } from '@components/custom-filter/custom-filter.component';
+import { CustomFilterComponent } from 'src/app/core/components/custom-filter/custom-filter.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -48,13 +48,25 @@ export class DashboardComponent implements AfterContentInit {
   private hoursBySquadChart: Chart | null = null;
   private hoursSpentBySquadChart: Chart | null = null;
   private taskStatusChart: Chart | null = null;
+
   constructor(private taskService: TaskService) {}
 
   async ngOnInit() {
+    // this.eventBusService.getEvent<Filter>('filter').subscribe((filter) => {
+    //   console.log("entrou: ", filter)
+    //   if (filter) {
+    //     this.selectedRelease = filter.release;
+    //     this.selectedSprint = filter.sprint;
+    //     this.selectedSquad = filter.squad;
+    //   }
+    // });
     if (this.flowType === 'cross') {
       this.members = CROSS_MEMBERS;
     }
     this.getActivity();
+
+
+
   }
 
   ngAfterContentInit(): void {
@@ -68,7 +80,11 @@ export class DashboardComponent implements AfterContentInit {
           this.onCleanFilter();
         }
       });
+
+
     }
+
+
   }
 
   onCleanFilter() {
@@ -109,7 +125,47 @@ export class DashboardComponent implements AfterContentInit {
 
       // Adiciona condições dinamicamente
       if (this.selectedMember !== 'Todos') {
-        conditions.push(task.crossName === this.selectedMember);
+        conditions.push(task.employeeName === this.selectedMember);
+      }
+      if (this.selectedRelease !== 'Todos') {
+        conditions.push(task.release === this.selectedRelease);
+      }
+      if (this.selectedSprint !== 'Todos') {
+        conditions.push(task.sprint === this.selectedSprint);
+      }
+      if (this.selectedSquad !== 'Todos') {
+        conditions.push(task.squad === this.selectedSquad);
+      }
+
+      // Verifica se todas as condições são verdadeiras
+      return conditions.every(Boolean);
+    });
+
+    console.log('act: ', this.activities);
+    this.createDashBoards(this.activities);
+  }
+
+  onFilterChange2(): void {
+    // Atualiza os filtros com base no tipo
+
+    // Se todos os filtros estão em "Todos", mostra todas as atividades
+    if (
+      this.selectedMember === 'Todos' &&
+      this.selectedSprint === 'Todos' &&
+      this.selectedRelease === 'Todos' &&
+      this.selectedSquad === 'Todos'
+    ) {
+      this.getActivity();
+      return;
+    }
+
+    // Filtragem composta com base nos filtros selecionados
+    this.activities = this.activitiesBackup.filter((task) => {
+      const conditions = [];
+
+      // Adiciona condições dinamicamente
+      if (this.selectedMember !== 'Todos') {
+        conditions.push(task.employeeName === this.selectedMember);
       }
       if (this.selectedRelease !== 'Todos') {
         conditions.push(task.release === this.selectedRelease);

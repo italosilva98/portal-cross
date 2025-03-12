@@ -1,7 +1,8 @@
-<app-home
+<!-- <app-home
   *ngIf="!isFlowActive"
   (setFlowEmitter)="handleFlow($event)"
-></app-home>
+  (setFilterEmitter)="handleFilter($event)"
+></app-home> -->
 
 <ng-container *ngIf="isFlowActive">
   <app-sidebar
@@ -16,10 +17,10 @@
     [ngSwitch]="currentRoute"
   >
     <app-dashboard *ngSwitchCase="'dashboard'" >
-      <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
+      <app-custom-filter [flowType]="flowType" filter [showPriority]="false" [selectedFilter]="filter"></app-custom-filter>
     </app-dashboard>
     <app-allocations *ngSwitchCase="'allocations'" [flowType]="flowType">
-      <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
+      <app-custom-filter [flowType]="flowType" filter [showPriority]="false"></app-custom-filter>
     </app-allocations>
     <app-kanban *ngSwitchCase="'kanban'" [flowType]="flowType">
       <app-custom-filter [flowType]="flowType" filter></app-custom-filter>

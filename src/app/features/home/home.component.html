@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container"  *ngIf="!showFilter">
   <div class="card" (click)="setFlow('squad')">
     Visão Squad
   </div>
@@ -6,3 +6,6 @@
     Visão Cross
   </div>
 </div>
+
+
+<app-filter-card *ngIf="showFilter" (applyFilterEmitter)="onSubmit($event)"></app-filter-card>

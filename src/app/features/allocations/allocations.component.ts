@@ -6,7 +6,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { CustomFilterComponent } from '@components/custom-filter/custom-filter.component';
+import { CustomFilterComponent } from 'src/app/core/components/custom-filter/custom-filter.component';
 import {
   CROSS_MEMBERS,
   PRIORITIES,
@@ -52,17 +52,19 @@ export class AllocationsComponent implements OnInit, AfterContentInit {
       Validators.required,
       Validators.min(1),
     ]),
-    crossName: new FormControl('', Validators.required),
+    employeeName: new FormControl('', Validators.required),
     squad: new FormControl('', Validators.required),
+    descricao: new FormControl('', Validators.required),
   });
 
   newAllocation = {
     id: '',
-    crossName: '',
+    employeeName: '',
     squad: '',
     allocatedHours: 0,
     sprint: '',
     release: '',
+    descricao: ''
   };
 
   constructor(private squadRequestService: SquadRequestsService) {}
@@ -128,7 +130,7 @@ export class AllocationsComponent implements OnInit, AfterContentInit {
 
       // Adiciona condições dinamicamente
       if (this.selectedMember !== 'Todos') {
-        conditions.push(task.crossName === this.selectedMember);
+        conditions.push(task.employeeName === this.selectedMember);
       }
       if (this.selectedRelease !== 'Todos') {
         conditions.push(task.release === this.selectedRelease);
@@ -168,7 +170,7 @@ export class AllocationsComponent implements OnInit, AfterContentInit {
         release: column.release,
         sprint: column.sprint,
         allocatedHours: column.allocatedHours,
-        crossName: column.crossName,
+        employeeName: column.employeeName,
         squad: column.squad,
       });
     }

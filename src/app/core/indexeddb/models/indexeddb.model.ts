@@ -2,7 +2,7 @@ import { DBSchema } from 'idb';
 
 export interface ISquadRequests {
   id: string;
-  crossName: string;
+  employeeName: string;
   sprint: string;
   release: string;
   squad: string;
@@ -18,11 +18,17 @@ export interface ITaskBoard {
   release: string;
   allocatedHours: number;
   spentHours: number;
-  crossName: string;
+  employeeName: string;
   createdDate: Date;
   updatedDate: Date;
   squad: string;
-  prioridade: string
+  priority: string;
+  tasks: [];
+}
+
+interface Tasks {
+  title: string;
+  description: string;
 }
 
 export interface AppDB extends DBSchema {
@@ -35,5 +41,5 @@ export interface AppDB extends DBSchema {
     key: string;
     value: ITaskBoard;
     indexes: Record<`by-${string}`, string>;
-  }
+  };
 }

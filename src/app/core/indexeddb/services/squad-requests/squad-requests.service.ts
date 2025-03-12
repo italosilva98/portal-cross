@@ -17,13 +17,26 @@ export class SquadRequestsService {
     return this.baseDB.getByIndex(SquadRequestsDB.nome, 'by-squad', squad);
   }
 
-  getRequestsByCrossName(
-    crossName: string
+  getRequestsBySquadAndEmployeeName(
+    squad: string,
+    employeeName: string
   ): Promise<ISquadRequests[]> {
+    return this.baseDB
+      .getAll(SquadRequestsDB.nome)
+      .then((requests: ISquadRequests[]) => {
+        console.log("request: ", requests)
+        return requests.filter(
+          (request) =>
+            request.squad === squad && request.employeeName === employeeName
+        );
+      });
+  }
+
+  getRequestsByEmployeeName(employeeName: string): Promise<ISquadRequests[]> {
     return this.baseDB.getByIndex(
       SquadRequestsDB.nome,
-      'by-crossName',
-      crossName
+      'by-employeeName',
+      employeeName
     );
   }
 
