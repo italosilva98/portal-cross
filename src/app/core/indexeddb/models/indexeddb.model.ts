@@ -7,6 +7,8 @@ export interface ISquadRequests {
   release: string;
   squad: string;
   allocatedHours: number;
+  allocatedHoursUsed: number;
+  description: string
 }
 
 export interface ITaskBoard {
@@ -24,11 +26,6 @@ export interface ITaskBoard {
   squad: string;
   priority: string;
   tasks: [];
-}
-
-interface Tasks {
-  title: string;
-  description: string;
 }
 
 export interface AppDB extends DBSchema {

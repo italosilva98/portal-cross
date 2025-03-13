@@ -8,7 +8,7 @@ import {
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ITaskBoard } from '@indexeddb/models/indexeddb.model';
+import { ISquadRequests, ITaskBoard } from '@indexeddb/models/indexeddb.model';
 import { TaskService } from '@indexeddb/services/task/task.service';
 import { CustomFilterComponent } from 'src/app/core/components/custom-filter/custom-filter.component';
 import {
@@ -20,27 +20,28 @@ import {
   SquadKey,
 } from '@constants/squad.constants';
 import { SquadRequestsService } from '@indexeddb/services/squad-requests/squad-requests.service';
+import { BaseFilterableComponent } from '@components/base/base-filterable.components';
 
 @Component({
   selector: 'app-activity-log',
   templateUrl: './activity-log.component.html',
   styleUrls: ['./activity-log.component.scss'],
 })
-export class ActivityLogComponent implements OnInit, AfterContentInit {
+export class ActivityLogComponent
+  extends BaseFilterableComponent<ITaskBoard>
+  implements OnInit, AfterContentInit
+{
   @Input() flowType: string = '';
 
   @ContentChild(CustomFilterComponent) filter!: CustomFilterComponent;
 
-  activities: ITaskBoard[] = [];
-  activitiesBackup: ITaskBoard[] = [];
-
-  selectedMember: string = 'Todos';
-  selectedRelease: string = 'Todos';
-  selectedSprint: string = 'Todos';
-  selectedSquad: string = 'Todos';
   totalAllocatedHours = 0;
   totalSpentAllocatedHours = 0;
   activitySpentAllocatedHours = 0;
+  activitySprint = '';
+  activityRelease = '';
+
+  squadRequest: ISquadRequests[] = [];
 
   newActivity = {
     id: '',
@@ -83,6 +84,7 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
   releases = RELEASES;
   squads = Object.keys(SQUAD_MEMBERS);
   priorities = PRIORITIES;
+  allHours = 0;
 
   squadForm: string = '';
   memberForm: string = '';
@@ -94,7 +96,9 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
   constructor(
     private taskService: TaskService,
     private squadRequestsService: SquadRequestsService
-  ) {}
+  ) {
+    super();
+  }
 
   ngAfterContentInit(): void {
     if (this.filter) {
@@ -109,11 +113,33 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     }
   }
 
+  //ok
   ngOnInit(): void {
     if (this.flowType === 'cross') {
       this.members = CROSS_MEMBERS;
     }
-    this.getActivity();
+    this.loadData();
+    this.getSquadRequests();
+  }
+
+  //ok
+  loadData() {
+    this.taskService.getAllTasks().then((response) => {
+      this.data = response;
+      this.dataBackup = response;
+    });
+  }
+
+  //ok
+  getSquadRequests() {
+    this.squadRequestsService.getAllSquadRequests().then((response) => {
+      this.squadRequest = response;
+    });
+  }
+
+  //ok
+  openModal() {
+    this.isModalOpen = true;
   }
 
   addTask(): void {
@@ -128,18 +154,6 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     this.tasks.removeAt(index);
   }
 
-  onCleanFilter() {
-    this.selectedMember = 'Todos';
-    this.selectedSprint = 'Todos';
-    this.selectedRelease = 'Todos';
-    this.selectedSquad = 'Todos';
-    this.activities = [...this.activitiesBackup];
-  }
-
-  openModal() {
-    this.isModalOpen = true;
-  }
-
   closeModal() {
     this.isModalOpen = false;
     this.isEditing = false;
@@ -151,18 +165,16 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
   onSubmit() {
     if (this.activityForm.valid) {
       if (this.isEditing && this.editActivityId) {
-        const index = this.activities.findIndex(
-          (a) => a.id === this.editActivityId
-        );
+        const index = this.data.findIndex((a) => a.id === this.editActivityId);
 
-        this.activities[index] = {
+        this.data[index] = {
           ...(this.activityForm.value as Required<ITaskBoard>),
           id: this.editActivityId!,
-          createdDate: this.activities[index].createdDate,
+          createdDate: this.data[index].createdDate,
           updatedDate: new Date(),
         };
 
-        this.taskService.updateTask(this.activities[index]);
+        this.taskService.updateTask(this.data[index]);
       } else {
         const newActivity: ITaskBoard = {
           ...(this.activityForm.value as Required<ITaskBoard>),
@@ -172,9 +184,25 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
         };
 
         this.taskService.addTask(newActivity).then(() => {
-          this.getActivity();
+          this.loadData();
         });
       }
+      const allocatedHours = this.activityForm.get('allocatedHours')?.value;
+      if (allocatedHours != null) {
+        if (this.squadRequest[0].allocatedHoursUsed)
+          this.squadRequest[0].allocatedHoursUsed += allocatedHours;
+        else {
+          this.squadRequest[0].allocatedHoursUsed = allocatedHours;
+        }
+      }
+
+      this.squadForm = 'activity.squad';
+      this.activitySprint = 'activity.sprint';
+      this.activityRelease = 'activity.release';
+      this.squadForm = '';
+      this.squadRequestsService.updateSquadRequests(this.squadRequest[0]);
+      this.squadRequest = [];
+      this.totalAllocatedHours = 0;
       this.closeModal();
     }
   }
@@ -185,7 +213,7 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     );
     if (confirmation) {
       this.taskService.deleteTask(id).then(() => {
-        this.getActivity();
+        this.loadData();
       });
       this.closeModal();
     }
@@ -207,8 +235,11 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
       priority: activity.priority,
     });
 
-    this.squadForm = activity.squad
-    this.getTotalAllocation(activity.employeeName)
+    this.squadForm = activity.squad;
+    this.activitySprint = activity.sprint;
+    this.activityRelease = activity.release;
+
+    this.getTotalAllocation(activity.employeeName, 'updateActivity');
 
     if (activity.tasks && activity.tasks.length) {
       this.tasks.clear();
@@ -225,44 +256,50 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     this.openModal();
   }
 
-  getActivity() {
-    this.taskService.getAllTasks().then((response) => {
-      this.activities = response;
-      this.activitiesBackup = response;
-    });
-  }
+  getTotalAllocation(employeeName: string, type: string) {
+    this.memberForm = employeeName;
+    if (
+      this.squadForm !== '' &&
+      this.activityRelease !== '' &&
+      this.activitySprint !== ''
+    ) {
+      let request = this.squadRequest.filter(
+        (request) =>
+          request.squad === this.squadForm &&
+          request.employeeName === this.memberForm &&
+          request.release === this.activityRelease &&
+          request.sprint === this.activitySprint
+      );
 
-  getTotalAllocation(employeeName: string) {
-    this.memberForm = employeeName
-    if (this.squadForm !== '') {
-      this.squadRequestsService
-        .getRequestsBySquadAndEmployeeName(this.squadForm, this.memberForm)
-        .then((response) => {
-          if (response[0]?.allocatedHours) {
-            console.log(response);
-            console.log(response[0]);
-            this.totalAllocatedHours = response[0].allocatedHours;
-            this.totalSpentAllocatedHours = this.totalAllocatedHours - this.activitySpentAllocatedHours
-            console.log(this.totalAllocatedHours);
-          }else {
-            this.totalAllocatedHours = 0
-          }
-        });
+      if (!request[0]?.allocatedHours) request[0].allocatedHours = 0;
+      this.totalAllocatedHours = request[0].allocatedHours;
+
+      this.totalSpentAllocatedHours =
+        request[0].allocatedHours - request[0].allocatedHoursUsed;
     }
   }
 
-  onAllocatedHoursChange(hour: number){
-    this.activitySpentAllocatedHours = hour
+  onAllocatedHoursChange(hour: number) {
+    this.activitySpentAllocatedHours = hour;
+  }
 
+  onReleaseChange(release: string) {
+    this.activityRelease = release;
+    this.getTotalAllocation(this.memberForm, 'onReleaseChange');
+  }
+
+  onSprintChange(sprint: string) {
+    this.activitySprint = sprint;
+    this.getTotalAllocation(this.memberForm, 'onSprintChange');
   }
 
   getActivityByemployeeName() {
     this.taskService
       .getTasksByEmployeeName(this.selectedMember)
       .then((response) => {
-        this.activities = response;
+        this.data = response;
 
-        this.activitiesBackup = response;
+        this.dataBackup = response;
       });
   }
 
@@ -270,13 +307,13 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
     this.taskService
       .getTasksByRelease(this.selectedRelease)
       .then((response) => {
-        this.activities = response;
+        this.data = response;
       });
   }
 
   getActivityBySprint() {
     this.taskService.getTasksBySprint(this.selectedSprint).then((response) => {
-      this.activities = response;
+      this.data = response;
     });
   }
 
@@ -285,57 +322,10 @@ export class ActivityLogComponent implements OnInit, AfterContentInit {
       this.members = SQUAD_MEMBERS[squad as SquadKey];
 
     this.squadForm = squad;
-    this.getTotalAllocation(this.memberForm)
+    this.getTotalAllocation(this.memberForm, 'onSquadChange');
   }
 
   onEmployeeNameChange(employeeName: string) {
-    this.getTotalAllocation(employeeName);
-  }
-
-  onFilterChange(newValue: string, type: string): void {
-    // Atualiza os filtros com base no tipo
-    if (type === 'member') {
-      this.selectedMember = newValue;
-    } else if (type === 'release') {
-      this.selectedRelease = newValue;
-    } else if (type === 'sprint') {
-      this.selectedSprint = newValue;
-    } else if (type === 'squad') {
-      this.members = SQUAD_MEMBERS[newValue as SquadKey];
-      this.selectedSquad = newValue;
-    }
-
-    // Se todos os filtros estão em "Todos", mostra todas as atividades
-    if (
-      this.selectedMember === 'Todos' &&
-      this.selectedSprint === 'Todos' &&
-      this.selectedRelease === 'Todos' &&
-      this.selectedSquad === 'Todos'
-    ) {
-      this.getActivity();
-      return;
-    }
-
-    // Filtragem composta com base nos filtros selecionados
-    this.activities = this.activitiesBackup.filter((task) => {
-      const conditions = [];
-
-      // Adiciona condições dinamicamente
-      if (this.selectedMember !== 'Todos') {
-        conditions.push(task.employeeName === this.selectedMember);
-      }
-      if (this.selectedRelease !== 'Todos') {
-        conditions.push(task.release === this.selectedRelease);
-      }
-      if (this.selectedSprint !== 'Todos') {
-        conditions.push(task.sprint === this.selectedSprint);
-      }
-      if (this.selectedSquad !== 'Todos') {
-        conditions.push(task.squad === this.selectedSquad);
-      }
-
-      // Verifica se todas as condições são verdadeiras
-      return conditions.every(Boolean);
-    });
+    this.getTotalAllocation(employeeName, 'onEmployeeNameChange');
   }
 }

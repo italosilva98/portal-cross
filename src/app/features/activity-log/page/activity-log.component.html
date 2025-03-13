@@ -66,7 +66,11 @@
 
       <div class="form-group">
         <label for="release">Release</label>
-        <select id="release" formControlName="release">
+        <select
+          id="release"
+          formControlName="release"
+          (ngModelChange)="onReleaseChange($event)"
+        >
           <option value="">Selecione a Release</option>
           <option *ngFor="let release of releases" [value]="release">
             {{ release }}
@@ -76,7 +80,11 @@
 
       <div class="form-group">
         <label for="sprint">Sprint</label>
-        <select id="sprint" formControlName="sprint">
+        <select
+          id="sprint"
+          formControlName="sprint"
+          (ngModelChange)="onSprintChange($event)"
+        >
           <option value="">Selecione a Sprint</option>
           <option *ngFor="let sprint of sprints" [value]="sprint">
             {{ sprint }}
@@ -199,7 +207,7 @@
 </div>
 
 <ul class="activity-list">
-  <li *ngFor="let activity of activities">
+  <li *ngFor="let activity of data">
     <i
       class="fas fa-pencil-alt edit-icon"
       (click)="updateActivity(activity)"

@@ -19,15 +19,19 @@ export class SquadRequestsService {
 
   getRequestsBySquadAndEmployeeName(
     squad: string,
-    employeeName: string
+    employeeName: string,
+    release: string,
+    sprint: string
   ): Promise<ISquadRequests[]> {
     return this.baseDB
       .getAll(SquadRequestsDB.nome)
       .then((requests: ISquadRequests[]) => {
-        console.log("request: ", requests)
         return requests.filter(
           (request) =>
-            request.squad === squad && request.employeeName === employeeName
+            request.squad === squad &&
+            request.employeeName === employeeName &&
+            request.release === release &&
+            request.sprint === sprint
         );
       });
   }

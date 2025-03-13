@@ -5,7 +5,7 @@ import {
   Input,
   OnInit,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomFilterComponent } from 'src/app/core/components/custom-filter/custom-filter.component';
 import {
   CROSS_MEMBERS,
@@ -18,62 +18,45 @@ import {
 import { ISquadRequests } from '@indexeddb/models/indexeddb.model';
 import { SquadRequestsService } from '@indexeddb/services/squad-requests/squad-requests.service';
 import { v4 as uuidv4 } from 'uuid';
+import { BaseFilterableComponent } from '@components/base/base-filterable.components';
 
 @Component({
   selector: 'app-allocations',
   templateUrl: './allocations.component.html',
   styleUrls: ['./allocations.component.scss'],
 })
-export class AllocationsComponent implements OnInit, AfterContentInit {
+export class AllocationsComponent
+  extends BaseFilterableComponent<ISquadRequests>
+  implements OnInit, AfterContentInit
+{
   @Input() flowType: string = '';
   @ContentChild(CustomFilterComponent) filter!: CustomFilterComponent;
 
-  allocations: ISquadRequests[] = [];
-  allocationsBackup: ISquadRequests[] = [];
   members: string[] = [];
   sprints = SPRINTS;
   releases = RELEASES;
   squads = Object.keys(SQUAD_MEMBERS);
   prioridades = PRIORITIES;
 
-  selectedMember: string = 'Todos';
-  selectedRelease: string = 'Todos';
-  selectedSprint: string = 'Todos';
-  selectedSquad: string = 'Todos';
-  selectedPriority: string = 'Todos';
-
   editAllocationId: string | null = null;
   isModalOpen = false;
   isEditing = false;
-  allocationForm = new FormGroup({
-    release: new FormControl('', Validators.required),
-    sprint: new FormControl('', Validators.required),
-    allocatedHours: new FormControl(1, [
-      Validators.required,
-      Validators.min(1),
-    ]),
-    employeeName: new FormControl('', Validators.required),
-    squad: new FormControl('', Validators.required),
-    descricao: new FormControl('', Validators.required),
-  });
 
-  newAllocation = {
-    id: '',
-    employeeName: '',
-    squad: '',
-    allocatedHours: 0,
-    sprint: '',
-    release: '',
-    descricao: ''
-  };
+  allocationForm!: FormGroup;
 
-  constructor(private squadRequestService: SquadRequestsService) {}
+  constructor(
+    private squadRequestService: SquadRequestsService,
+    private fb: FormBuilder
+  ) {
+    super();
+  }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     if (this.flowType === 'cross') {
       this.members = CROSS_MEMBERS;
     }
-    this.getLocationData();
+    this.createForm();
+    await this.loadData();
   }
 
   ngAfterContentInit(): void {
@@ -89,134 +72,145 @@ export class AllocationsComponent implements OnInit, AfterContentInit {
     }
   }
 
-  onCleanFilter() {
-    this.selectedMember = 'Todos';
-    this.selectedSprint = 'Todos';
-    this.selectedRelease = 'Todos';
-    this.selectedSquad = 'Todos';
-    this.selectedPriority = 'Todos';
-    this.allocations = [...this.allocationsBackup];
-  }
-
-  onFilterChange(newValue: string, type: string): void {
-    // Atualiza os filtros com base no tipo
-    if (type === 'member') {
-      this.selectedMember = newValue;
-    } else if (type === 'release') {
-      this.selectedRelease = newValue;
-    } else if (type === 'sprint') {
-      this.selectedSprint = newValue;
-    } else if (type === 'squad') {
-      this.selectedSquad = newValue;
-    } else if (type === 'priority') {
-      this.selectedPriority = newValue;
-    }
-
-    // Se todos os filtros estão em "Todos", mostra todas as atividades
-    if (
-      this.selectedMember === 'Todos' &&
-      this.selectedSprint === 'Todos' &&
-      this.selectedRelease === 'Todos' &&
-      this.selectedSquad === 'Todos' &&
-      this.selectedPriority === 'Todos'
-    ) {
-      this.getLocationData();
-      return;
-    }
-
-    // Filtragem composta com base nos filtros selecionados
-    this.allocations = this.allocationsBackup.filter((task) => {
-      const conditions = [];
-
-      // Adiciona condições dinamicamente
-      if (this.selectedMember !== 'Todos') {
-        conditions.push(task.employeeName === this.selectedMember);
-      }
-      if (this.selectedRelease !== 'Todos') {
-        conditions.push(task.release === this.selectedRelease);
-      }
-      if (this.selectedSprint !== 'Todos') {
-        conditions.push(task.sprint === this.selectedSprint);
-      }
-      if (this.selectedSquad !== 'Todos') {
-        conditions.push(task.squad === this.selectedSquad);
-      }
-
-      // Verifica se todas as condições são verdadeiras
-      return conditions.every(Boolean);
+  private createForm(): void {
+    this.allocationForm = this.fb.group({
+      release: ['', Validators.required],
+      sprint: ['', Validators.required],
+      allocatedHours: [0, [Validators.required, Validators.min(0)]],
+      employeeName: ['', Validators.required],
+      squad: ['', Validators.required],
+      descricao: [''],
     });
   }
 
-  getLocationData() {
-    this.squadRequestService.getAllSquadRequests().then((response) => {
-      this.allocations = response;
-      this.allocationsBackup = response;
-    });
+  async loadData(): Promise<void> {
+    try {
+      const response = await this.squadRequestService.getAllSquadRequests();
+      this.data = response;
+      this.dataBackup = response;
+    } catch (error) {
+      console.error('Erro ao carregar alocações:', error);
+    }
   }
 
-  updateActivity(task: any) {
+  updateActivity(allocation: ISquadRequests): void {
     this.isEditing = true;
-    this.editAllocationId = task.id;
-
-    this.filterById(task.id);
-
+    this.editAllocationId = allocation.id;
+    this.filterById(allocation.id);
     this.openModal();
   }
 
-  filterById(id: string) {
-    const column = this.allocations.find((col) => col.id === id);
-    if (column) {
+  private filterById(id: string): void {
+    const allocation = this.data.find((col) => col.id === id);
+    if (allocation) {
       this.allocationForm.patchValue({
-        release: column.release,
-        sprint: column.sprint,
-        allocatedHours: column.allocatedHours,
-        employeeName: column.employeeName,
-        squad: column.squad,
+        release: allocation.release,
+        sprint: allocation.sprint,
+        allocatedHours: allocation.allocatedHours,
+        employeeName: allocation.employeeName,
+        squad: allocation.squad,
+        descricao: allocation.description,
       });
     }
   }
 
-  openModal() {
+  openModal(): void {
     this.isModalOpen = true;
   }
 
-  onSquadChange(squad: string) {
-    if (this.flowType === 'squad')
+  onSquadChange(squad: string): void {
+    if (this.flowType === 'squad') {
       this.members = SQUAD_MEMBERS[squad as SquadKey];
-  }
-
-  onSubmit() {
-    if (this.allocationForm.valid) {
-      if (this.isEditing && this.editAllocationId) {
-        const index = this.allocations.findIndex(
-          (a) => a.id === this.editAllocationId
-        );
-
-        this.allocations[index] = {
-          ...(this.allocationForm.value as Required<ISquadRequests>),
-          id: this.editAllocationId!,
-        };
-
-        this.squadRequestService.updateSquadRequests(this.allocations[index]);
-        this.getLocationData();
-      } else {
-        const newAllocation: ISquadRequests = {
-          ...(this.allocationForm.value as Required<ISquadRequests>),
-          id: uuidv4(),
-        };
-        this.squadRequestService.addSquadRequests(newAllocation).then(() => {
-          this.getLocationData();
-        });
-      }
-      this.closeModal();
     }
   }
 
-  deleteAllocation(id: string) {
-    this.allocations = this.allocations.filter((s) => s.id !== id);
+  async onSubmit(): Promise<void> {
+    if (!this.allocationForm.valid) {
+      return;
+    }
+    const allocationData = this.allocationForm
+      .value as Required<ISquadRequests>;
+
+    if (this.isEditing && this.editAllocationId) {
+      await this.handleUpdateAllocation(allocationData);
+    } else {
+      await this.handleCreateAllocation(allocationData);
+    }
   }
 
-  closeModal() {
+  private async handleUpdateAllocation(
+    allocationData: Required<ISquadRequests>
+  ): Promise<void> {
+    const allocationIndex = this.data.findIndex(
+      (a) => a.id === this.editAllocationId
+    );
+
+    if (allocationIndex < 0) {
+      console.error('Alocação para atualização não encontrada.');
+      return;
+    }
+
+    const updatedAllocation: ISquadRequests = {
+      ...allocationData,
+      id: this.editAllocationId!,
+    };
+
+    this.data[allocationIndex] = updatedAllocation;
+
+    try {
+      await this.squadRequestService.updateSquadRequests(updatedAllocation);
+      await this.loadData();
+      this.closeModal();
+    } catch (error) {
+      console.error('Erro ao atualizar a alocação:', error);
+    }
+  }
+
+  private async handleCreateAllocation(
+    allocationData: Required<ISquadRequests>
+  ): Promise<void> {
+    const newAllocation: ISquadRequests = {
+      ...allocationData,
+      id: uuidv4(),
+    };
+
+    const duplicateAllocations = this.data.filter(
+      (a) =>
+        a.squad === allocationData.squad &&
+        a.release === allocationData.release &&
+        a.sprint === allocationData.sprint &&
+        a.employeeName === allocationData.employeeName
+    );
+
+    if (duplicateAllocations.length > 0) {
+      alert(
+        'Já existe alocação cadastrada para essa squad, release, sprint e colaborador'
+      );
+      return;
+    }
+
+    try {
+      await this.squadRequestService.addSquadRequests(newAllocation);
+      await this.loadData();
+      this.closeModal();
+    } catch (error) {
+      console.error('Erro ao criar a alocação:', error);
+    }
+  }
+
+  async deleteAllocation(id: string): Promise<void> {
+    try {
+      await this.squadRequestService.deleteSquadRequests(id);
+      await this.loadData();
+    } catch (error) {
+      console.error('Erro ao deletar a alocação:', error);
+    }
+  }
+
+  /**
+   * Fecha o modal e reseta o estado de edição.
+   */
+  closeModal(): void {
     this.isModalOpen = false;
     this.isEditing = false;
     this.editAllocationId = null;

@@ -13,7 +13,7 @@ type TaskBoardDB = typeof TaskBoardDB;
 
 export const IndexedDB = {
   nome: 'CrossAllocationsDB',
-  versao: 3,
+  versao: 4,
   stores: {
     SquadRequestsDB,
     TaskBoardDB,

@@ -12,7 +12,7 @@
   </div>
 </div>
 <div class="allocation-list">
-  <div class="allocation-card" *ngFor="let allocation of allocations">
+  <div class="allocation-card" *ngFor="let allocation of data">
     <h3>{{ allocation.employeeName }}</h3>
     <p>Squad: {{ allocation.squad }}</p>
     <p>Horas Alocadas: {{ allocation.allocatedHours }}h</p>
@@ -33,7 +33,6 @@
         <label for="employeeName">Colaborador</label>
         <select
           id="employeeName"
-          [(ngModel)]="newAllocation.employeeName"
           name="employeeName"
           required
           formControlName="employeeName"
@@ -69,7 +68,6 @@
         <label for="squad">Squad</label>
         <select
           id="squad"
-          [(ngModel)]="newAllocation.squad"
           name="squad"
           required
           formControlName="squad"
