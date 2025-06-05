@@ -1,5 +1,6 @@
 import {
   AfterContentInit,
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ContentChild,
@@ -31,6 +32,7 @@ import { BaseFilterableComponent } from '@components/base/base-filterable.compon
   selector: 'app-kanban',
   templateUrl: './kanban.component.html',
   styleUrls: ['./kanban.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KanbanComponent
   extends BaseFilterableComponent<ITaskBoard>
@@ -84,11 +86,8 @@ export class KanbanComponent
     priority: '',
   };
 
-  constructor(
-    private taskService: TaskService,
-    private cd: ChangeDetectorRef
-  ) {
-    super()
+  constructor(private taskService: TaskService, private cd: ChangeDetectorRef) {
+    super();
   }
 
   ngOnInit() {
@@ -102,6 +101,7 @@ export class KanbanComponent
     if (this.filter) {
       this.filter.filterChangeEmmiter.subscribe((filter) => {
         this.onFilterChange(filter.value, filter.event);
+        
       });
 
       this.filter.cleanFilterEmitter.subscribe((isCleanFilter) => {
@@ -113,7 +113,7 @@ export class KanbanComponent
   }
 
   override onCleanFilter() {
-    super.onCleanFilter()
+    super.onCleanFilter();
     this.createBoard(this.data);
   }
 
@@ -165,9 +165,7 @@ export class KanbanComponent
   onSubmit() {
     if (this.activityForm.valid) {
       if (this.isEditing && this.editActivityId) {
-        const index = this.data.findIndex(
-          (a) => a.id === this.editActivityId
-        );
+        const index = this.data.findIndex((a) => a.id === this.editActivityId);
 
         this.data[index] = {
           ...(this.activityForm.value as Required<ITaskBoard>),
@@ -270,7 +268,7 @@ export class KanbanComponent
   }
 
   override onFilterChange(newValue: string, type: string): void {
-    super.onFilterChange(newValue, type)
+    super.onFilterChange(newValue, type);
     this.createBoard(this.data);
   }
 

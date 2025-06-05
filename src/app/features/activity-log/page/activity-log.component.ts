@@ -1,5 +1,6 @@
 import {
   AfterContentInit,
+  ChangeDetectionStrategy,
   Component,
   ContentChild,
   Input,
@@ -21,11 +22,13 @@ import {
 } from '@constants/squad.constants';
 import { SquadRequestsService } from '@indexeddb/services/squad-requests/squad-requests.service';
 import { BaseFilterableComponent } from '@components/base/base-filterable.components';
+import { debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-activity-log',
   templateUrl: './activity-log.component.html',
   styleUrls: ['./activity-log.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActivityLogComponent
   extends BaseFilterableComponent<ITaskBoard>
@@ -119,7 +122,33 @@ export class ActivityLogComponent
       this.members = CROSS_MEMBERS;
     }
     this.loadData();
-    this.getSquadRequests();
+    this.activityForm.valueChanges.pipe(debounceTime(300)).subscribe((val) => {
+      this.applyFilter(val);
+    });
+  }
+
+  applyFilter(filters: any) {
+    console.log('req: ', this.squadRequest);
+    const filtered = this.squadRequest.filter((item) => {
+      return (
+        (!filters.release || item.release === filters.release) &&
+        (!filters.sprint || item.sprint === filters.sprint) &&
+        (!filters.employeeName || item.employeeName === filters.employeeName) &&
+        (!filters.squad || item.squad === filters.squad)
+      );
+    });
+    this.totalAllocatedHours = filtered.reduce(
+      (sum, current) => sum + current.allocatedHours,
+      0
+    );
+    console.log('filtered: ', filtered);
+    this.totalSpentAllocatedHours =
+      this.totalAllocatedHours -
+      filtered.reduce((sum, current) => sum + current.allocatedHoursUsed, 0);
+    // console.log(
+    //   'teste1: ',
+    //   filtered.reduce((sum, current) => sum + current.allocatedHoursUsed, 0)
+    // );
   }
 
   //ok
@@ -134,11 +163,14 @@ export class ActivityLogComponent
   getSquadRequests() {
     this.squadRequestsService.getAllSquadRequests().then((response) => {
       this.squadRequest = response;
+      console.log('requests: ', response);
     });
   }
 
   //ok
   openModal() {
+    this.getSquadRequests();
+
     this.isModalOpen = true;
   }
 
@@ -182,29 +214,48 @@ export class ActivityLogComponent
           createdDate: new Date(),
           updatedDate: new Date(),
         };
-
         this.taskService.addTask(newActivity).then(() => {
           this.loadData();
         });
       }
-      const allocatedHours = this.activityForm.get('allocatedHours')?.value;
-      if (allocatedHours != null) {
-        if (this.squadRequest[0].allocatedHoursUsed)
-          this.squadRequest[0].allocatedHoursUsed += allocatedHours;
-        else {
-          this.squadRequest[0].allocatedHoursUsed = allocatedHours;
-        }
-      }
+
+      // this.updateSquadRequest();
 
       this.squadForm = 'activity.squad';
       this.activitySprint = 'activity.sprint';
       this.activityRelease = 'activity.release';
       this.squadForm = '';
-      this.squadRequestsService.updateSquadRequests(this.squadRequest[0]);
-      this.squadRequest = [];
-      this.totalAllocatedHours = 0;
+
       this.closeModal();
     }
+  }
+
+  updateSquadRequest() {
+    const release = this.activityForm.get('release')?.value;
+    const sprint = this.activityForm.get('sprint')?.value;
+    const employeeName = this.activityForm.get('employeeName')?.value;
+    const squad = this.activityForm.get('squad')?.value;
+    const allocatedHours = this.activityForm.get('allocatedHours')?.value;
+
+    const filtered = this.squadRequest.filter((item) => {
+      return (
+        item.release === release &&
+        item.sprint === sprint &&
+        item.employeeName === employeeName &&
+        item.squad === squad
+      );
+    });
+
+    console.log('filtereed: ', filtered);
+    if (allocatedHours != null) {
+      if (filtered[0].allocatedHoursUsed) {
+        filtered[0].allocatedHoursUsed += allocatedHours;
+      } else {
+        filtered[0].allocatedHoursUsed = allocatedHours;
+      }
+    }
+
+    this.squadRequestsService.updateSquadRequests(filtered[0]);
   }
 
   deleteActivity(id: string) {
@@ -215,6 +266,8 @@ export class ActivityLogComponent
       this.taskService.deleteTask(id).then(() => {
         this.loadData();
       });
+
+      this.updateSquadRequest();
       this.closeModal();
     }
   }
@@ -239,8 +292,6 @@ export class ActivityLogComponent
     this.activitySprint = activity.sprint;
     this.activityRelease = activity.release;
 
-    this.getTotalAllocation(activity.employeeName, 'updateActivity');
-
     if (activity.tasks && activity.tasks.length) {
       this.tasks.clear();
       activity.tasks.forEach((task: any) => {
@@ -256,41 +307,18 @@ export class ActivityLogComponent
     this.openModal();
   }
 
-  getTotalAllocation(employeeName: string, type: string) {
-    this.memberForm = employeeName;
-    if (
-      this.squadForm !== '' &&
-      this.activityRelease !== '' &&
-      this.activitySprint !== ''
-    ) {
-      let request = this.squadRequest.filter(
-        (request) =>
-          request.squad === this.squadForm &&
-          request.employeeName === this.memberForm &&
-          request.release === this.activityRelease &&
-          request.sprint === this.activitySprint
-      );
-
-      if (!request[0]?.allocatedHours) request[0].allocatedHours = 0;
-      this.totalAllocatedHours = request[0].allocatedHours;
-
-      this.totalSpentAllocatedHours =
-        request[0].allocatedHours - request[0].allocatedHoursUsed;
-    }
-  }
-
   onAllocatedHoursChange(hour: number) {
     this.activitySpentAllocatedHours = hour;
   }
 
   onReleaseChange(release: string) {
     this.activityRelease = release;
-    this.getTotalAllocation(this.memberForm, 'onReleaseChange');
+    // this.getTotalAllocation(this.memberForm, 'onReleaseChange');
   }
 
   onSprintChange(sprint: string) {
     this.activitySprint = sprint;
-    this.getTotalAllocation(this.memberForm, 'onSprintChange');
+    // this.getTotalAllocation(this.memberForm, 'onSprintChange');
   }
 
   getActivityByemployeeName() {
@@ -322,10 +350,10 @@ export class ActivityLogComponent
       this.members = SQUAD_MEMBERS[squad as SquadKey];
 
     this.squadForm = squad;
-    this.getTotalAllocation(this.memberForm, 'onSquadChange');
+    // this.getTotalAllocation(this.memberForm, 'onSquadChange');
   }
 
   onEmployeeNameChange(employeeName: string) {
-    this.getTotalAllocation(employeeName, 'onEmployeeNameChange');
+    // this.getTotalAllocation(employeeName, 'onEmployeeNameChange');
   }
 }

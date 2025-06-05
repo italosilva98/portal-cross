@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { ChangeDetectorRef, inject, Injectable } from '@angular/core';
 
 export interface TaskFilter {
   employeeName: string;
@@ -19,6 +19,8 @@ export abstract class BaseFilterableComponent<T extends TaskFilter> {
   selectedRelease: string = 'Todos';
   selectedSquad: string = 'Todos';
   selectedPriority: string = 'Todos';
+
+  readonly cdr = inject(ChangeDetectorRef)
 
   /**
    * Método abstrato para carregar os dados iniciais.
@@ -43,7 +45,6 @@ export abstract class BaseFilterableComponent<T extends TaskFilter> {
    * Se todos os filtros estiverem em "Todos", chama o método loadData() para recarregar os dados.
    */
   onFilterChange(newValue: string, type: string): void {
-    console.log('entrouuu');
     switch (type) {
       case 'member':
         this.selectedMember = newValue;
@@ -75,6 +76,9 @@ export abstract class BaseFilterableComponent<T extends TaskFilter> {
       return;
     }
     this.data = this.applyFilters(this.dataBackup);
+
+    this.cdr.markForCheck()
+
   }
 
   /**

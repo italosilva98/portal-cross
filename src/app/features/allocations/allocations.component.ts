@@ -1,5 +1,7 @@
 import {
   AfterContentInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ContentChild,
   Input,
@@ -24,6 +26,7 @@ import { BaseFilterableComponent } from '@components/base/base-filterable.compon
   selector: 'app-allocations',
   templateUrl: './allocations.component.html',
   styleUrls: ['./allocations.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AllocationsComponent
   extends BaseFilterableComponent<ISquadRequests>
@@ -70,6 +73,7 @@ export class AllocationsComponent
         }
       });
     }
+    this.cdr.markForCheck();
   }
 
   private createForm(): void {
@@ -88,6 +92,7 @@ export class AllocationsComponent
       const response = await this.squadRequestService.getAllSquadRequests();
       this.data = response;
       this.dataBackup = response;
+      this.cdr.markForCheck();
     } catch (error) {
       console.error('Erro ao carregar alocações:', error);
     }
