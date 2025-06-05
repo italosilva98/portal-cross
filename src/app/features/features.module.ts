@@ -6,6 +6,7 @@ import { ActivityLogComponent } from './activity-log/page/activity-log.component
 import { AllocationsComponent } from './allocations/allocations.component';
 import { HomeComponent } from './home/home.component';
 import { FilterCardComponent } from './home/components/filter-card/filter-card.component';
+import { TabletTasksComponent } from './tablet-tasks/page/tablet-tasks.component';
 
 const COMPONENTS = [
   DashboardComponent,
@@ -13,7 +14,8 @@ const COMPONENTS = [
   ActivityLogComponent,
   AllocationsComponent,
   HomeComponent,
-  FilterCardComponent
+  FilterCardComponent,
+  TabletTasksComponent
 ];
 
 @NgModule({
