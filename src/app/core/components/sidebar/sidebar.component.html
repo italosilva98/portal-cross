@@ -41,5 +41,14 @@
         <span *ngIf="!isMinimized">Atividades</span>
       </a>
     </li>
+    <li>
+      <a
+        (click)="navigate('tablet')"
+        [class.active]="activeRoute === 'tablet'"
+      >
+        <span class="icon">📱</span>
+        <span *ngIf="!isMinimized">Tablet</span>
+      </a>
+    </li>
   </ul>
 </nav>
