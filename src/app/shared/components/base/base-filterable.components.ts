@@ -43,7 +43,6 @@ export abstract class BaseFilterableComponent<T extends TaskFilter> {
    * Se todos os filtros estiverem em "Todos", chama o método loadData() para recarregar os dados.
    */
   onFilterChange(newValue: string, type: string): void {
-    console.log('entrouuu');
     switch (type) {
       case 'member':
         this.selectedMember = newValue;

@@ -14,7 +14,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { ITaskBoard } from '@indexeddb/models/indexeddb.model';
 import { TaskService } from '@indexeddb/services/task/task.service';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Column, Task } from '../models/kanban.models';
 import {
   CROSS_MEMBERS,
@@ -57,14 +57,12 @@ export class KanbanComponent
     status: new FormControl('', Validators.required),
     release: new FormControl('', Validators.required),
     sprint: new FormControl('', Validators.required),
-    allocatedHours: new FormControl(1, [
-      Validators.required,
-      Validators.min(1),
-    ]),
-    spentHours: new FormControl(0, [Validators.required, Validators.min(0)]),
+    allocatedHours: new FormControl(1),
+    spentHours: new FormControl(0),
     employeeName: new FormControl('', Validators.required),
     squad: new FormControl('', Validators.required),
     priority: new FormControl('', Validators.required),
+    tasks: new FormArray([]),
   });
   connectedLists: string[] = [];
 
@@ -82,13 +80,15 @@ export class KanbanComponent
     updatedDate: new Date(),
     squad: '',
     priority: '',
+    tasks: [],
   };
 
-  constructor(
-    private taskService: TaskService,
-    private cd: ChangeDetectorRef
-  ) {
-    super()
+  get tasks(): FormArray {
+    return this.activityForm.get('tasks') as FormArray;
+  }
+
+  constructor(private taskService: TaskService, private cd: ChangeDetectorRef) {
+    super();
   }
 
   ngOnInit() {
@@ -113,7 +113,7 @@ export class KanbanComponent
   }
 
   override onCleanFilter() {
-    super.onCleanFilter()
+    super.onCleanFilter();
     this.createBoard(this.data);
   }
 
@@ -127,6 +127,19 @@ export class KanbanComponent
     this.editActivityId = task.id;
 
     this.filterById(task.id);
+    console.log("tasks- ", task)
+
+    if (task.tasks && task.tasks.length) {
+      this.tasks.clear();
+      task.tasks.forEach((task: any) => {
+        this.tasks.push(
+          new FormGroup({
+            title: new FormControl(task.title, Validators.required),
+            description: new FormControl(task.description),
+          })
+        );
+      });
+    }
 
     this.openModal();
   }
@@ -163,11 +176,10 @@ export class KanbanComponent
   }
 
   onSubmit() {
+    console.log("form: ", this.activityForm)
     if (this.activityForm.valid) {
       if (this.isEditing && this.editActivityId) {
-        const index = this.data.findIndex(
-          (a) => a.id === this.editActivityId
-        );
+        const index = this.data.findIndex((a) => a.id === this.editActivityId);
 
         this.data[index] = {
           ...(this.activityForm.value as Required<ITaskBoard>),
@@ -210,13 +222,13 @@ export class KanbanComponent
     this.taskService.getAllTasks().then((response) => {
       this.data = response;
       this.dataBackup = response;
-
+      console.log("data - ", this.data)
       this.createBoard(response);
     });
   }
 
   createBoard(tasks: ITaskBoard[]) {
-    const ordemColunas = ['To Do', 'In Progress', 'Review', 'Done'];
+    const ordemColunas = ['To Do', 'In Progress', 'Done'];
 
     this.board = this.transformToBoard(tasks);
 
@@ -228,6 +240,18 @@ export class KanbanComponent
       return existingColumn || { name, tasks: [] };
     });
     this.connectedLists = this.board.map((column) => column.name);
+  }
+
+  addTask(): void {
+    const taskGroup = new FormGroup({
+      title: new FormControl('', Validators.required),
+      description: new FormControl(''),
+    });
+    this.tasks.push(taskGroup);
+  }
+
+  removeTask(index: number): void {
+    this.tasks.removeAt(index);
   }
 
   transformToBoard(tasks: ITaskBoard[]): Column[] {
@@ -242,6 +266,7 @@ export class KanbanComponent
         title: task.title,
         description: task.description,
         priority: task.priority,
+        tasks: task.tasks
       });
       return groups;
     }, {} as Record<string, Task[]>);
@@ -270,9 +295,10 @@ export class KanbanComponent
   }
 
   override onFilterChange(newValue: string, type: string): void {
-    super.onFilterChange(newValue, type)
+    super.onFilterChange(newValue, type);
     this.createBoard(this.data);
   }
+
 
   drop(event: CdkDragDrop<any[]>) {
     const taskId = event.item.data.id;

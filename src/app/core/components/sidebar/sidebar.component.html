@@ -32,7 +32,7 @@
         <span *ngIf="!isMinimized">Quadro Kanban</span>
       </a>
     </li>
-    <li>
+    <!-- <li>
       <a
         (click)="navigate('activities')"
         [class.active]="activeRoute === 'activities'"
@@ -40,14 +40,14 @@
         <span class="icon">✅</span>
         <span *ngIf="!isMinimized">Atividades</span>
       </a>
-    </li>
+    </li> -->
     <li>
       <a
-        (click)="navigate('tablet')"
-        [class.active]="activeRoute === 'tablet'"
+        (click)="navigate('planDay')"
+        [class.active]="activeRoute === 'planDay'"
       >
-        <span class="icon">📱</span>
-        <span *ngIf="!isMinimized">Tablet</span>
+        <span class="icon">🗓️</span>
+        <span *ngIf="!isMinimized">Meu Dia</span>
       </a>
     </li>
   </ul>

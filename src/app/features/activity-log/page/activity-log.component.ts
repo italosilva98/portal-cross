@@ -125,8 +125,10 @@ export class ActivityLogComponent
   //ok
   loadData() {
     this.taskService.getAllTasks().then((response) => {
-      this.data = response;
-      this.dataBackup = response;
+      this.data = response
+        .filter((task) => task.status !== 'Done')
+      this.dataBackup = response
+        .filter((task) => task.status !== 'Done')
     });
   }
 

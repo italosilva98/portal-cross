@@ -5,19 +5,13 @@
 ></app-home> -->
 
 <ng-container *ngIf="isFlowActive">
-  <app-sidebar
-    [flowType]="flowType"
-    (routeClicked)="onRouteClicked($event)"
-    (isMinimizedClicked)="isMinimized = $event"
-  >
+  <app-sidebar [flowType]="flowType" (routeClicked)="onRouteClicked($event)"
+    (isMinimizedClicked)="isMinimized = $event">
   </app-sidebar>
-  <div
-    class="main-content"
-    [class.minimized]="isMinimized"
-    [ngSwitch]="currentRoute"
-  >
-    <app-dashboard *ngSwitchCase="'dashboard'" >
-      <app-custom-filter [flowType]="flowType" filter [showPriority]="false" [selectedFilter]="filter"></app-custom-filter>
+  <div class="main-content" [class.minimized]="isMinimized" [ngSwitch]="currentRoute">
+    <app-dashboard *ngSwitchCase="'dashboard'">
+      <app-custom-filter [flowType]="flowType" filter [showPriority]="false"
+        [selectedFilter]="filter"></app-custom-filter>
     </app-dashboard>
     <app-allocations *ngSwitchCase="'allocations'" [flowType]="flowType">
       <app-custom-filter [flowType]="flowType" filter [showPriority]="false"></app-custom-filter>
@@ -28,6 +22,9 @@
     <app-activity-log *ngSwitchCase="'activities'" [flowType]="flowType">
       <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
     </app-activity-log>
-    <app-tablet-tasks *ngSwitchCase="'tablet'"></app-tablet-tasks>
+    <app-plan-day *ngSwitchCase="'planDay'">
+      <app-custom-filter [flowType]="flowType" filter></app-custom-filter>
+
+    </app-plan-day>
   </div>
 </ng-container>

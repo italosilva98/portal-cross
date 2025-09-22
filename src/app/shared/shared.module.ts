@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 const COMMON_COMPONENTS = [
   FormsModule,
@@ -11,9 +10,7 @@ const COMMON_COMPONENTS = [
   BrowserAnimationsModule,
   ReactiveFormsModule,
   DragDropModule,
-  FontAwesomeModule
 ];
-
 
 @NgModule({
   declarations: [],

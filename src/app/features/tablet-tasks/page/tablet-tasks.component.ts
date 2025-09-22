@@ -11,7 +11,7 @@ import { TaskService } from '@indexeddb/services/task/task.service';
 export class TabletTasksComponent implements OnInit {
   tasks: ITaskBoard[] = [];
 
-  private exampleTasks: ITaskBoard[] = [
+  exampleTasks: ITaskBoard[] = [
     {
       id: uuidv4(),
       title: 'Tarefa 1',

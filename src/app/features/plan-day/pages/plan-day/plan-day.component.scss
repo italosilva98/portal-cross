@@ -1,0 +1,112 @@
+.container {
+  // max-width: 500px;
+  margin: auto;
+  padding: 2rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+
+    h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    p {
+      margin: 0.25rem 0 0;
+      color: #4b5563;
+      font-size: 0.9rem;
+    }
+
+    .handle {
+      cursor: grab;
+      margin-right: 10px;
+      font-size: 1.2rem;
+      color: #9ca3af;
+      width: 50px;
+
+      input {
+        width: 50px;
+      }
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      color: white;
+
+      &.alta {
+        background: #ef4444;
+      }
+
+      &.média {
+        background: #f59e0b;
+      }
+
+      &.baixa {
+        background: #22c55e;
+      }
+    }
+  }
+
+  button {
+    margin-top: 1.5rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #1d4ed8;
+    }
+  }
+}
+
+
+::ng-deep .cdk-drag-preview {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  background: white;
+  padding: 1rem;
+  width: 100%;
+  z-index: 1000;
+}
+
+::ng-deep .cdk-drag-placeholder {
+  opacity: 0;
+}
+::ng-deep .cdk-drag-preview {
+  @extend .card; // se usar SCSS
+}
+::ng-deep .cdk-drag-preview h3,
+::ng-deep .cdk-drag-preview p {
+  margin: 0;
+  word-break: break-word;
+  white-space: normal;
+}
+

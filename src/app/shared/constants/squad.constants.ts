@@ -17,8 +17,6 @@ export const SQUAD_MEMBERS: Record<SquadKey, string[]> = {
 
 export const CROSS_MEMBERS = [
   'Italo Silvestre',
-  'Luiz Arquiteto',
-  'Gabriel UX',
 ];
 export const SPRINTS = ['S1', 'S2', 'S3', 'S4'];
 export const RELEASES = ['R1', 'R2', 'R3', 'R4'];
