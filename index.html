@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="box box--brand"></div>
+      <div class="box box--content">
+        <div class="card" role="main" aria-labelledby="titulo">
+          <div class="brand">
+            <div class="brand-badge" aria-hidden="true">
+              <!-- ícone simples -->
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="8"
+                  stroke="currentColor"
+                  stroke-width="2"
+                />
+              </svg>
+            </div>
+            <h1 id="titulo">Entrar</h1>
+          </div>
+          <p class="sub">Selecione um método para acessar sua conta.</p>
+
+          <div class="options" role="list">
+            <!-- ISAM -->
+            <a
+              class="opt isam"
+              role="listitem"
+              href="/auth/isam"
+              aria-label="Continuar com ISAM"
+            >
+              <div class="opt-left">
+                <div class="icon" aria-hidden="true">
+                  <!-- shield -->
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 3l7 3v5.6c0 4.9-3.1 9.3-7 10.4-3.9-1.1-7-5.5-7-10.4V6l7-3z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      fill="none"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <div class="title">ISAM</div>
+                  <div class="desc">
+                    Login corporativo via IBM Security Access Manager.
+                  </div>
+                </div>
+              </div>
+              <svg
+                class="chev"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M9 6l6 6-6 6"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+
+            <!-- Entra ID -->
+            <a
+              class="opt entra"
+              role="listitem"
+              href="/auth/entra"
+              aria-label="Continuar com Microsoft Entra ID"
+            >
+              <div class="opt-left">
+                <div class="icon" aria-hidden="true">
+                  <!-- triângulo -->
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 4l8 14H4L12 4z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      fill="none"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <div class="title">Microsoft Entra ID</div>
+                  <div class="desc">SSO/MFA com sua conta Microsoft.</div>
+                </div>
+              </div>
+              <svg
+                class="chev"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M9 6l6 6-6 6"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
